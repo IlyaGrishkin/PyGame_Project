@@ -28,6 +28,50 @@ map_sprites = pygame.sprite.Group()
 block_sprites = pygame.sprite.Group()
 
 
+class Tank(pygame.sprite.Sprite):
+    image = load_image('tank.png')
+
+    def __init__(self, x, y):
+        super().__init__(map_sprites)
+        self.image = Tank.image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self, *args):
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= 1
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += 1
+        if keys[pygame.K_UP]:
+            self.rect.y -= 1
+        if keys[pygame.K_DOWN]:
+            self.rect.y += 1
+
+
+class Turret(pygame.sprite.Sprite):
+    image = load_image('turret.png')
+
+    def __init__(self):
+        super().__init__(map_sprites)
+        self.image = Turret.image
+        self.rect = Turret.image.get_rect()
+        self.rect.x = tank.rect.x + 10
+        self.rect.y = tank.rect.y + 10
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self, *args):
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= 1
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += 1
+        if keys[pygame.K_UP]:
+            self.rect.y -= 1
+        if keys[pygame.K_DOWN]:
+            self.rect.y += 1
+
+
 class Water(pygame.sprite.Sprite):
     image = load_image('water.png')
 
@@ -174,10 +218,16 @@ if __name__ == '__main__':
     pygame.mouse.set_visible(False)
     arrow = Arrow(all_sprites)
     bullet = Bullet()
+    tank = Tank(300, 300)
+    turret = Turret()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            keys = pygame.key.get_pressed()
+            if keys:
+                tank.update(keys)
+                turret.update(keys)
             if pygame.mouse.get_focused():
                 x, y = pygame.mouse.get_pos()
                 arrow.update(event)
@@ -188,15 +238,10 @@ if __name__ == '__main__':
         map_sprite.draw(surf_alpha)
         block_sprites.draw(surf_alpha)
         screen.blit(surf_alpha, (0, 0))
-
-        all_sprites.draw(screen)
-
+        # all_sprites.draw(screen)
         map_sprite.update()
         block_sprites.update()
-
         bullet_sprite.draw(screen)
-
         bullet_sprite.update(5, 0)
-
         pygame.display.flip()
         clock.tick(fps)
