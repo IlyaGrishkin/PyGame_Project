@@ -3,6 +3,8 @@ import sys
 
 import pygame
 
+from PyGame_Project.main import arrow
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -38,6 +40,10 @@ class Block(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self):
+        if pygame.sprite.collide_mask(self, arrow):
+            print('intersection!')
 
 
 class Ground(pygame.sprite.Sprite):
@@ -96,5 +102,6 @@ def generate_map(array):
             x += 40
         y += 40
     return all_sprites
+
 
 
