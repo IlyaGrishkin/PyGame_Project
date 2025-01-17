@@ -51,9 +51,9 @@ class Block(pygame.sprite.Sprite):
         self.rect.y = y
         self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self):
-        if pygame.sprite.collide_mask(self, arrow):
-            print('Block')
+    # def update(self):
+    #     if pygame.sprite.collide_mask(self, arrow):
+    #         print('Block')
 
 
 class Ground(pygame.sprite.Sprite):
@@ -146,6 +146,7 @@ class Bullet(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = 0
         self.rect.y = 420
+        self.time = 0  # счетчик времени до взрыва
 
     def update(self, dx, dy):
         if not pygame.sprite.spritecollideany(self, block_sprites):
@@ -153,6 +154,9 @@ class Bullet(pygame.sprite.Sprite):
             self.rect.y += dy
         else:
             self.image = self.boom_image
+            self.time += clock.get_time() / 10
+        if self.time >= 30:  # если время вышло объект удаляется
+            self.kill()
 
 
 bullet_sprite = pygame.sprite.Group()
@@ -176,11 +180,10 @@ if __name__ == '__main__':
                 running = False
             if pygame.mouse.get_focused():
                 x, y = pygame.mouse.get_pos()
-                all_sprites.update(event)
+                arrow.update(event)
             else:
-                for elem in all_sprites:
-                    elem.rect.x = -100
-                    elem.rect.y = -100
+                arrow.rect.x = -100
+                arrow.rect.y = -100
 
         map_sprite.draw(surf_alpha)
         block_sprites.draw(surf_alpha)
