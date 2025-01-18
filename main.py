@@ -26,50 +26,57 @@ def load_image(name, colorkey=None):
 
 map_sprites = pygame.sprite.Group()
 block_sprites = pygame.sprite.Group()
+tank_sprites = pygame.sprite.Group()
 
 
 class Tank(pygame.sprite.Sprite):
-    image = load_image('tank.png')
-
     def __init__(self, x, y):
-        super().__init__(map_sprites)
-        self.image = Tank.image
-        self.rect = self.image.get_rect()
+        super().__init__(tank_sprites)
+        self.og_surf = pygame.transform.smoothscale(load_image("tank.png", colorkey=(0, 255, 0)).convert(), (60, 111))
+        self.surf = self.og_surf
+        self.rect = self.surf.get_rect()
+        self.angle = 0
         self.rect.x = x
         self.rect.y = y
-        self.mask = pygame.mask.from_surface(self.image)
+        self.change_angle = 0
+
+    def rot(self):
+        self.surf = pygame.transform.rotate(self.og_surf, self.angle)
+        self.angle += self.change_angle
+        self.angle = self.angle % 360
+        self.rect = self.surf.get_rect(center=self.rect.center)
 
     def update(self, *args):
+        self.change_angle = 0
         if keys[pygame.K_LEFT]:
-            self.rect.x -= 1
-        if keys[pygame.K_RIGHT]:
-            self.rect.x += 1
-        if keys[pygame.K_UP]:
-            self.rect.y -= 1
-        if keys[pygame.K_DOWN]:
-            self.rect.y += 1
+            self.change_angle = 10
+        elif keys[pygame.K_RIGHT]:
+            self.change_angle = -10
+        self.rot()
 
 
 class Turret(pygame.sprite.Sprite):
-    image = load_image('turret.png')
-
     def __init__(self):
-        super().__init__(map_sprites)
-        self.image = Turret.image
-        self.rect = Turret.image.get_rect()
-        self.rect.x = tank.rect.x + 10
-        self.rect.y = tank.rect.y + 10
-        self.mask = pygame.mask.from_surface(self.image)
+        super().__init__(tank_sprites)
+        self.og_surf = pygame.transform.smoothscale(load_image("turret.png", (0, 0, 0)).convert(), (40, 74))
+        self.surf = self.og_surf
+        self.rect = self.surf.get_rect(center=tank.rect.center)
+        self.angle = 0
+        self.change_angle = 0
+
+    def rot(self):
+        self.surf = pygame.transform.rotate(self.og_surf, self.angle)
+        self.angle += self.change_angle
+        self.angle = self.angle % 360
+        self.rect = self.surf.get_rect(center=tank.rect.center)
 
     def update(self, *args):
+        self.change_angle = 0
         if keys[pygame.K_LEFT]:
-            self.rect.x -= 1
-        if keys[pygame.K_RIGHT]:
-            self.rect.x += 1
-        if keys[pygame.K_UP]:
-            self.rect.y -= 1
-        if keys[pygame.K_DOWN]:
-            self.rect.y += 1
+            self.change_angle = 10
+        elif keys[pygame.K_RIGHT]:
+            self.change_angle = -10
+        self.rot()
 
 
 class Water(pygame.sprite.Sprite):
@@ -183,13 +190,13 @@ class Bullet(pygame.sprite.Sprite):
     image = load_image("bullet.png")
     boom_image = load_image("boom.png")
 
-    def __init__(self):
+    def __init__(self, x, y):
         super().__init__(bullet_sprite)
         self.image = Bullet.image
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.x = 0
-        self.rect.y = 420
+        self.rect.x = x
+        self.rect.y = y
         self.time = 0  # счетчик времени до взрыва
 
     def update(self, dx, dy):
@@ -217,7 +224,6 @@ if __name__ == '__main__':
     running = True
     pygame.mouse.set_visible(False)
     arrow = Arrow(all_sprites)
-    bullet = Bullet()
     tank = Tank(300, 300)
     turret = Turret()
     while running:
@@ -226,8 +232,7 @@ if __name__ == '__main__':
                 running = False
             keys = pygame.key.get_pressed()
             if keys:
-                tank.update(keys)
-                turret.update(keys)
+                tank_sprites.update(keys)
             if pygame.mouse.get_focused():
                 x, y = pygame.mouse.get_pos()
                 arrow.update(event)
@@ -238,7 +243,9 @@ if __name__ == '__main__':
         map_sprite.draw(surf_alpha)
         block_sprites.draw(surf_alpha)
         screen.blit(surf_alpha, (0, 0))
-        # all_sprites.draw(screen)
+        screen.blit(tank.surf, tank.rect)
+        screen.blit(turret.surf, turret.rect)
+        all_sprites.draw(screen)
         map_sprite.update()
         block_sprites.update()
         bullet_sprite.draw(screen)
