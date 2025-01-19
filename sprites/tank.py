@@ -119,8 +119,8 @@ class Tank(pygame.sprite.Sprite):
         turret.angle %= 2 * math.pi
         rotate_degrees = math.degrees(turret.angle) - 90
         turret.surf = pygame.transform.rotate(turret.og_surf, rotate_degrees)
-        turret.rect.x = (self.rect.x + 30) + 30 * math.sin(self.tank_angle)
-        turret.rect.y = (self.rect.y + 30) - -50 * math.cos(self.tank_angle)
+        turret.rect.x = self.rect.center[0]
+        turret.rect.y = self.rect.center[1]
         turret.rect = turret.surf.get_rect(
             center=(turret.rect.x, turret.rect.y))
 
@@ -168,7 +168,7 @@ class Turret(pygame.sprite.Sprite):
             load_image("turret.png", (0, 0, 0)).convert(), (40, 74))
         self.surf = self.og_surf
         self.tank = tank
-        self.rect = self.surf.get_rect()
+        self.rect = self.surf.get_rect(center=tank.rect.center)
         self.rect.x = 0
         self.rect.y = 0
         self.angle = 0
@@ -178,7 +178,7 @@ class Turret(pygame.sprite.Sprite):
         self.surf = pygame.transform.rotate(self.og_surf, self.angle)
         self.angle += self.change_angle
         self.angle = self.angle % 360
-        self.rect = self.surf.get_rect()
+        self.rect = self.surf.get_rect(center=tank.rect.center)
 
     def update(self):
         self.rect.x = self.tank.rect.x
