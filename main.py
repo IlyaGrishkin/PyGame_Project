@@ -6,7 +6,7 @@ import sys
 import random
 
 from map_logic import generate_map, read_map
-from sprites.tank import Tank, Turret  # , Turret
+from sprites.tank import Bullet, Tank, Turret  # , Turret
 from sprites.zombie import Zombie
 
 arrow_sprites = pygame.sprite.Group()
@@ -14,7 +14,7 @@ map_sprites = pygame.sprite.Group()
 block_sprites = pygame.sprite.Group()
 tank_sprites = pygame.sprite.Group()
 turret_sprites = pygame.sprite.Group()
-bullet_sprite = pygame.sprite.Group()
+bullet_sprites = pygame.sprite.Group()
 zombie_sprites = pygame.sprite.Group()
 
 
@@ -91,19 +91,25 @@ if __name__ == '__main__':
 
         # отрисовка игровых объектов
         screen.blit(surf_alpha, (0, 0))
-        screen.blit(tank.surf, tank.rect)
-        screen.blit(turret.surf, turret.rect)
-        arrow_sprites.draw(screen)
-        # screen.blit(arrow.image, arrow.rect)
         for zombie in zombie_sprites:
             screen.blit(zombie.surf, zombie.rect)
+        screen.blit(tank.surf, tank.rect)
+        screen.blit(turret.surf, turret.rect)
+        # for bullet in tank.bullets:
+        #     bullet = Bullet(
+        #         bullet_sprites, bullet[0], bullet[1], bullet[2], bullet[3],
+        #     )
+
+        if tank.bullet_info:
+            bullet = Bullet(bullet_sprites, *tank.bullet_info)
+            # bullet.rotate()
+        for bullet in bullet_sprites:
+            screen.blit(bullet.surf, bullet.rect)
+        bullet_sprites.update(block_sprites, clock)
 
         map_sprite.update()
         # block_sprites.update()
-
-        # тестовая пулька
-        bullet_sprite.draw(screen)
-        bullet_sprite.update(5, 0)
+        arrow_sprites.draw(screen)
 
         pygame.display.flip()
         clock.tick(fps)

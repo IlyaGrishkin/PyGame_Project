@@ -17,9 +17,15 @@ class Tank(pygame.sprite.Sprite):
         self.acceleration = 0.08
         self.max_speed = 3
         self.current_speed = 0
-        self.bullet_speed = 10
+        self.bullet_speed = 100
         self.reload_time = 3
         self.last_shot_time = 0
+        self.bullet_speed = 10
+        self.bullets = []
+        self.bullet_info = None  # None - не было выстрела; иначе данные о выстреле
+
+        # длина ствола
+        self.barrel_length = 30
 
         # скорость вращения башни
         self.turret_rotation_speed = 0.03
@@ -68,12 +74,6 @@ class Tank(pygame.sprite.Sprite):
         else:
             self.tank_rotation_speed_actual = self.tank_rotation_speed
 
-    def rot(self):
-        self.surf = pygame.transform.rotate(self.og_surf, self.angle)
-        self.angle += self.change_angle
-        self.angle = self.angle % 360
-        self.rect = self.surf.get_rect(center=self.rect.center)
-
     def control_rotation(self, keys):
         if self.current_speed < 0:  # если движение назад, то инвертированный поворот
             if keys[pygame.K_w]:
@@ -117,7 +117,6 @@ class Tank(pygame.sprite.Sprite):
         turret.angle += (angle_difference *
                          self.turret_rotation_speed) % (2 * math.pi)
         turret.angle %= 2 * math.pi
-        print(desired_angle, turret.angle)
         rotate_degrees = math.degrees(turret.angle) - 90
         turret.surf = pygame.transform.rotate(turret.og_surf, rotate_degrees)
         turret.rect.x = self.rect.center[0]
@@ -125,17 +124,20 @@ class Tank(pygame.sprite.Sprite):
         turret.rect = turret.surf.get_rect(
             center=(turret.rect.x, turret.rect.y))
 
-    # def shoot_bullet(self, turret: "Turret"):
-    #     current_time = time.time()
-    #     if pygame.mouse.get_pressed()[0] and current_time - self.last_shot_time > self.reload_time:
-    #         bullet_dx = bullet_speed * math.cos(turret.angle)
-    #         bullet_dy = -bullet_speed * math.sin(turret.angle)
-    #         turret_x = tank_x + turret_offset * math.sin(self.tank_angle)
-    #         turret_y = tank_y - turret_offset * math.cos(self.tank_angle)
-    #         end_x = turret_x + barrel_length * math.cos(turret.angle)
-    #         end_y = turret_y - barrel_length * math.sin(turret.angle)
-    #         bullets.append([end_x, end_y, bullet_dx, bullet_dy])
-    #         last_shot_time = current_time
+    def shoot_bullet(self, keys, turret: "Turret"):
+        current_time = time.time()
+        if pygame.mouse.get_pressed()[0] and current_time - self.last_shot_time > self.reload_time:
+            bullet_dx = self.bullet_speed * math.cos(turret.angle)
+            bullet_dy = -self.bullet_speed * math.sin(turret.angle)
+            # turret_x = self.rect.x + math.sin(self.tank_angle)
+            # turret_y = self.rect.y - math.cos(self.tank_angle)
+            print(math.cos(turret.angle))
+            end_x = (turret.rect.x + 5) + \
+                self.barrel_length * math.cos(turret.angle)
+            end_y = (turret.rect.y + 5) - \
+                self.barrel_length * math.sin(turret.angle)
+            self.last_shot_time = current_time
+            return [end_x, end_y, bullet_dx, bullet_dy, turret.angle]
 
     def update(self, keys, mouse_x, mouse_y, turret: "Turret"):
         # логика скорости
@@ -159,7 +161,13 @@ class Tank(pygame.sprite.Sprite):
         ...
 
         # логика стрельбы
-        ...
+        self.bullet_info = self.shoot_bullet(keys, turret=turret)
+
+        # проверка столкновений с блоками
+        # for block in block_sprites:
+        #     if pygame.sprite.collide_mask(self, block):
+        #         self.rect.x -= self.current_speed * math.sin(self.tank_angle)
+        #         self.rect.y -= self.current_speed * math.cos(self.tank_angle)
 
 
 class Turret(pygame.sprite.Sprite):
@@ -175,31 +183,34 @@ class Turret(pygame.sprite.Sprite):
         self.angle = 0
         self.change_angle = 0
 
-    def rot(self):
-        self.surf = pygame.transform.rotate(self.og_surf, self.angle)
-        self.angle += self.change_angle
-        self.angle = self.angle % 360
-        self.rect = self.surf.get_rect(center=tank.rect.center)
-
     def update(self):
         self.rect.x = self.tank.rect.x
         self.rect.y = self.tank.rect.y
 
 
 class Bullet(pygame.sprite.Sprite):
-    image = load_image("bullet.png")
+    # image = load_image("bullet.png")
     boom_image = load_image("boom.png")
 
-    def __init__(self, group, x, y, dx, dy):
+    def __init__(self, group, x, y, dx, dy, turret_angle):
         super().__init__(group)
-        self.image = Bullet.image
-        self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
+        self.og_surf = pygame.transform.smoothscale(
+            load_image("bullet.png").convert_alpha(), (25, 25))
+        self.surf = self.og_surf
+        self.rect = self.surf.get_rect()
+        self.mask = pygame.mask.from_surface(self.surf)
         self.rect.x = x
         self.rect.y = y
         self.dx = dx
         self.dy = dy
+        self.angle = turret_angle
         self.time = 0  # счетчик времени до взрыва
+        self.rotate()
+
+    def rotate(self):
+        rotate_degrees = math.degrees(self.angle)
+        self.surf = pygame.transform.rotate(self.og_surf, rotate_degrees)
+        self.rect = self.surf.get_rect(center=self.rect.center)
 
     def update(self, block_sprites, clock):
         if not pygame.sprite.spritecollideany(self, block_sprites):
