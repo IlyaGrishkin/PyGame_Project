@@ -104,8 +104,10 @@ class Tank(pygame.sprite.Sprite):
     def move_tank(self):
         new_x = self.rect.x + self.current_speed * math.sin(self.tank_angle)
         new_y = self.rect.y - self.current_speed * math.cos(self.tank_angle)
-        self.rect.x = new_x
-        self.rect.y = new_y
+        if 0 <= new_x <= 1080 - self.rect.width:
+            self.rect.x = new_x
+        if 0 <= new_y <= 720 - self.rect.height:
+            self.rect.y = new_y
 
     def rotate_turret(self, mouse_x, mouse_y, turret: "Turret"):
         desired_angle = math.atan2(
