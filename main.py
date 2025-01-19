@@ -34,7 +34,7 @@ class Arrow(pygame.sprite.Sprite):
         super().__init__(arrow_sprites)
         self.image = Arrow.image
         self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
+        # self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = -100
         self.rect.y = -100
 

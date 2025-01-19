@@ -109,7 +109,7 @@ class Tank(pygame.sprite.Sprite):
 
     def rotate_turret(self, mouse_x, mouse_y, turret: "Turret"):
         desired_angle = math.atan2(
-            self.rect.y - mouse_y, mouse_x - self.rect.x) % (2 * math.pi)
+            turret.rect.y - mouse_y, mouse_x - turret.rect.x) % (2 * math.pi)
         angle_difference = (desired_angle - turret.angle) % (2 * math.pi)
         if angle_difference > math.pi:
             angle_difference -= 2 * math.pi
@@ -117,6 +117,7 @@ class Tank(pygame.sprite.Sprite):
         turret.angle += (angle_difference *
                          self.turret_rotation_speed) % (2 * math.pi)
         turret.angle %= 2 * math.pi
+        print(desired_angle, turret.angle)
         rotate_degrees = math.degrees(turret.angle) - 90
         turret.surf = pygame.transform.rotate(turret.og_surf, rotate_degrees)
         turret.rect.x = self.rect.center[0]

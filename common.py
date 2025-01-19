@@ -8,9 +8,6 @@ def load_image(name, colorkey=None):
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
     image = pygame.image.load(fullname)
     if colorkey is not None:
         image = image.convert()
