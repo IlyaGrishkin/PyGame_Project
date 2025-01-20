@@ -53,6 +53,8 @@ if __name__ == '__main__':
         map_sprites=map_sprites,
     )
 
+    block_sprites.add(*blocks)
+
     # базовые настройки
     pygame.display.set_caption('Танкокалипсис')
     fps = 100
@@ -83,9 +85,9 @@ if __name__ == '__main__':
                 arrow.rect.x = -100
                 arrow.rect.y = -100
 
-        tank_sprites.update(keys, mouse_x, mouse_y, turret)
+        tank_sprites.update(keys, mouse_x, mouse_y, block_sprites, turret)
         # turret.update()
-        # отрисовка карты
+        # отрисовка картыaaa
         map_sprite.draw(surf_alpha)
         # block_sprites.draw(surf_alpha)
 
