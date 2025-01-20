@@ -53,6 +53,8 @@ if __name__ == '__main__':
         map_sprites=map_sprites,
     )
 
+    block_sprites.add(*blocks)
+
     # базовые настройки
     pygame.display.set_caption('Танкокалипсис')
     fps = 100

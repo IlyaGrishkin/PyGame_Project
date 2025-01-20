@@ -131,9 +131,6 @@ class Tank(pygame.sprite.Sprite):
         if pygame.mouse.get_pressed()[0] and current_time - self.last_shot_time > self.reload_time:
             bullet_dx = self.bullet_speed * math.cos(turret.angle)
             bullet_dy = -self.bullet_speed * math.sin(turret.angle)
-            # turret_x = self.rect.x + math.sin(self.tank_angle)
-            # turret_y = self.rect.y - math.cos(self.tank_angle)
-            print(math.cos(turret.angle))
             end_x = (turret.rect.x + 5) + \
                 self.barrel_length * math.cos(turret.angle)
             end_y = (turret.rect.y + 5) - \
@@ -191,16 +188,29 @@ class Turret(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
-    # image = load_image("bullet.png")
+    image = load_image("bullet.png")
     boom_image = load_image("boom.png")
 
     def __init__(self, group, x, y, dx, dy, turret_angle):
         super().__init__(group)
-        self.og_surf = pygame.transform.smoothscale(
-            load_image("bullet.png").convert_alpha(), (25, 25))
+        self.og_surf = pygame.transform.smoothscale(self.image, (25, 25))
         self.surf = self.og_surf
         self.rect = self.surf.get_rect()
         self.mask = pygame.mask.from_surface(self.surf)
+
+        # взрывные картинки
+        self.boom_images = []
+        for num in range(1, 6):
+            img = pygame.image.load(f"data/explosion/exp{num}.png")
+            img = pygame.transform.scale(img, (50, 50))
+            self.boom_images.append(img)
+        self.boom_index = 0
+        self.boom_image = self.boom_images[self.boom_index]
+        self.boom_rect = self.image.get_rect()
+        self.boom_rect.center = [x, y]
+        self.boom_counter = 0
+        self.explosion_speed = 4
+
         self.rect.x = x
         self.rect.y = y
         self.dx = dx
@@ -219,7 +229,10 @@ class Bullet(pygame.sprite.Sprite):
             self.rect.x += self.dx
             self.rect.y += self.dy
         else:
-            self.image = self.boom_image
-            self.time += clock.get_time() / 10
-        if self.time >= 30:  # если время вышло объект удаляется
+            self.boom_counter += 1
+            if self.boom_counter >= self.explosion_speed and self.boom_index < len(self.boom_images) - 1:
+                self.boom_counter = 0
+                self.boom_index += 1
+                self.surf = self.boom_images[self.boom_index]
+        if self.boom_index >= len(self.boom_images) - 1 and self.boom_counter >= self.explosion_speed:  # если время вышло объект удаляется
             self.kill()
