@@ -85,7 +85,7 @@ if __name__ == '__main__':
                 arrow.rect.x = -100
                 arrow.rect.y = -100
 
-        tank_sprites.update(keys, mouse_x, mouse_y, turret)
+        tank_sprites.update(keys, mouse_x, mouse_y, block_sprites, turret)
         # turret.update()
         # отрисовка карты
         map_sprite.draw(surf_alpha)
@@ -110,7 +110,7 @@ if __name__ == '__main__':
         bullet_sprites.update(block_sprites, clock)
 
         map_sprite.update()
-        # block_sprites.update()
+        zombie_sprites.update(bullet_sprites, clock)
         arrow_sprites.draw(screen)
 
         pygame.display.flip()

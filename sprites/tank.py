@@ -6,6 +6,8 @@ from common import load_image
 
 
 class Tank(pygame.sprite.Sprite):
+    image = load_image("tank.png")
+
     def __init__(self, group, x, y):
         super().__init__(group)
         self.og_surf = pygame.transform.smoothscale(load_image(
@@ -23,7 +25,9 @@ class Tank(pygame.sprite.Sprite):
         self.bullet_speed = 10
         self.bullets = []
         self.bullet_info = None  # None - не было выстрела; иначе данные о выстреле
-
+        self.mask = pygame.mask.from_surface(Tank.image)
+        self.old_x = self.rect.x
+        self.old_y = self.rect.y
         # длина ствола
         self.barrel_length = 30
 
@@ -102,11 +106,13 @@ class Tank(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect(center=self.rect.center)
 
     def move_tank(self):
+        self.old_x = self.rect.x
+        self.old_y = self.rect.y
         new_x = self.rect.x + self.current_speed * math.sin(self.tank_angle)
         new_y = self.rect.y - self.current_speed * math.cos(self.tank_angle)
-        if 0 <= new_x <= 1080 - self.rect.width:
+        if -40 <= new_x <= 1100 - self.rect.width:
             self.rect.x = new_x
-        if 0 <= new_y <= 720 - self.rect.height:
+        if -40 <= new_y <= 750 - self.rect.height:
             self.rect.y = new_y
 
     def rotate_turret(self, mouse_x, mouse_y, turret: "Turret"):
@@ -132,13 +138,20 @@ class Tank(pygame.sprite.Sprite):
             bullet_dx = self.bullet_speed * math.cos(turret.angle)
             bullet_dy = -self.bullet_speed * math.sin(turret.angle)
             end_x = (turret.rect.x + 5) + \
-                self.barrel_length * math.cos(turret.angle)
+                    self.barrel_length * math.cos(turret.angle)
             end_y = (turret.rect.y + 5) - \
-                self.barrel_length * math.sin(turret.angle)
+                    self.barrel_length * math.sin(turret.angle)
             self.last_shot_time = current_time
             return [end_x, end_y, bullet_dx, bullet_dy, turret.angle]
 
-    def update(self, keys, mouse_x, mouse_y, turret: "Turret"):
+    def block_collide(self, block_sprites):
+        if not pygame.sprite.spritecollideany(self, block_sprites):
+            pass
+        else:
+            self.rect.x = self.old_x
+            self.rect.y = self.old_y
+
+    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret"):
         # логика скорости
         self.control_speed(keys)
 
@@ -147,6 +160,10 @@ class Tank(pygame.sprite.Sprite):
 
         # управление поворотом танка
         self.control_rotation(keys)
+
+        # проверка столкновений с блоками
+
+        self.block_collide(block_sprites)
 
         # перемещение танка
         self.move_tank()
@@ -234,5 +251,6 @@ class Bullet(pygame.sprite.Sprite):
                 self.boom_counter = 0
                 self.boom_index += 1
                 self.surf = self.boom_images[self.boom_index]
-        if self.boom_index >= len(self.boom_images) - 1 and self.boom_counter >= self.explosion_speed:  # если время вышло объект удаляется
+        if self.boom_index >= len(
+                self.boom_images) - 1 and self.boom_counter >= self.explosion_speed:  # если время вышло объект удаляется
             self.kill()

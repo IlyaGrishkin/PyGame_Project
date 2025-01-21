@@ -32,7 +32,7 @@ class Block(pygame.sprite.Sprite):
 
 
 class Ground(pygame.sprite.Sprite):
-    image = load_image('ground.png')
+    image = load_image('ground.jpg')
 
     def __init__(self, group, x, y):
         super().__init__(group)
