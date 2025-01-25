@@ -29,5 +29,5 @@ class Zombie(pygame.sprite.Sprite):
             self.killed = True
         if self.killed:
             self.time -= clock.get_time() / 100
-            if self.time <= 0:
-                self.kill()
+        if self.time <= 0:
+            self.kill()

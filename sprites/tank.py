@@ -145,11 +145,11 @@ class Tank(pygame.sprite.Sprite):
             return [end_x, end_y, bullet_dx, bullet_dy, turret.angle]
 
     def block_collide(self, block_sprites):
-        if not pygame.sprite.spritecollideany(self, block_sprites):
-            pass
-        else:
-            self.rect.x = self.old_x
-            self.rect.y = self.old_y
+        self.mask = pygame.mask.from_surface(self.surf)
+        for elem in block_sprites:
+            if pygame.sprite.collide_mask(self, elem):
+                self.rect.x = self.old_x
+                self.rect.y = self.old_y
 
     def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret"):
         # логика скорости
