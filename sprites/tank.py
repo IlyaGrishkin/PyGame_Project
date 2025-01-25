@@ -28,6 +28,7 @@ class Tank(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(Tank.image)
         self.old_x = self.rect.x
         self.old_y = self.rect.y
+        self.hp = 3
         # длина ствола
         self.barrel_length = 30
 
@@ -151,7 +152,14 @@ class Tank(pygame.sprite.Sprite):
                 self.rect.x = self.old_x
                 self.rect.y = self.old_y
 
-    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret"):
+    def zombie_collide(self, zombie_sprites):
+        self.mask = pygame.mask.from_surface(self.surf)
+        for elem in zombie_sprites:
+            if pygame.sprite.collide_mask(self, elem):
+                if not elem.killed:
+                    self.hp -= 1
+
+    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites):
         # логика скорости
         self.control_speed(keys)
 
@@ -164,6 +172,10 @@ class Tank(pygame.sprite.Sprite):
         # проверка столкновений с блоками
 
         self.block_collide(block_sprites)
+
+        # проверка столкновений с зомби
+
+        self.zombie_collide(zombie_sprites)
 
         # перемещение танка
         self.move_tank()
