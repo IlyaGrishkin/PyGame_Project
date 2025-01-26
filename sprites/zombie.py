@@ -39,8 +39,5 @@ class Zombie(pygame.sprite.Sprite):
             self.start = pygame.time.get_ticks()
             self.surf = pygame.transform.smoothscale(
                 load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
-        if pygame.sprite.spritecollideany(self, tank_sprites) and not self.killed:
-            self.surf = pygame.transform.smoothscale(
-                load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
         if self.killed:
             self.zombie_kill(self.start)

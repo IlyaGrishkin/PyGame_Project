@@ -159,6 +159,8 @@ class Tank(pygame.sprite.Sprite):
                 if not elem.killed:
                     self.hp -= 1
                     elem.killed = True
+                    elem.surf = pygame.transform.smoothscale(
+                load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
                     elem.start = pygame.time.get_ticks()
 
     def draw_hp(self, screen, width, height):
