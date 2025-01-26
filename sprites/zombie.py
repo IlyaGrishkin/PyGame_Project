@@ -30,7 +30,7 @@ class Zombie(pygame.sprite.Sprite):
 
     def zombie_kill(self, start):
         self.time = (pygame.time.get_ticks() - start) / 1000
-        if self.time > 10:
+        if self.time > 3:
             self.kill()
 
     def update(self, bullet_sprites, tank_sprites):
@@ -40,8 +40,6 @@ class Zombie(pygame.sprite.Sprite):
             self.surf = pygame.transform.smoothscale(
                 load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
         if pygame.sprite.spritecollideany(self, tank_sprites) and not self.killed:
-            self.killed = True
-            self.start = pygame.time.get_ticks()
             self.surf = pygame.transform.smoothscale(
                 load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
         if self.killed:

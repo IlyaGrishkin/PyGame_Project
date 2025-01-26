@@ -158,6 +158,19 @@ class Tank(pygame.sprite.Sprite):
             if pygame.sprite.collide_mask(self, elem):
                 if not elem.killed:
                     self.hp -= 1
+                    elem.killed = True
+                    elem.start = pygame.time.get_ticks()
+
+    def draw_hp(self, screen, width, height):
+        font = pygame.font.Font(None, 50)
+        text = font.render('Здоровье: ' + str(self.hp), True, (255, 0, 0))
+        text_x = 20
+        text_y = 20
+        text_w = text.get_width()
+        text_h = text.get_height()
+        screen.blit(text, (text_x, text_y))
+        pygame.draw.rect(screen, (255, 0, 0), (text_x - 10, text_y - 10,
+                                               text_w + 20, text_h + 20), 1)
 
     def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites):
         # логика скорости

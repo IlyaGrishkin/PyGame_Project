@@ -89,7 +89,7 @@ if __name__ == '__main__':
         # turret.update()
         # отрисовка карты
         map_sprite.draw(surf_alpha)
-        # block_sprites.draw(surf_alpha)
+        # block_sprites.draw(surf_alpha)22
 
         # отрисовка игровых объектов
         screen.blit(surf_alpha, (0, 0))
@@ -101,7 +101,7 @@ if __name__ == '__main__':
         #     bullet = Bullet(
         #         bullet_sprites, bullet[0], bullet[1], bullet[2], bullet[3],
         #     )
-
+        tank.draw_hp(screen, width, height)
         if tank.bullet_info:
             bullet = Bullet(bullet_sprites, *tank.bullet_info)
             # bullet.rotate()
@@ -112,6 +112,8 @@ if __name__ == '__main__':
         map_sprite.update()
         zombie_sprites.update(bullet_sprites, tank_sprites)
         arrow_sprites.draw(screen)
-
+        if tank.hp == 0:
+            print('Вы проиграли!')
+            running = False
         pygame.display.flip()
         clock.tick(fps)
