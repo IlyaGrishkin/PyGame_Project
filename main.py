@@ -11,12 +11,12 @@ from sprites.zombie import Zombie
 
 arrow_sprites = pygame.sprite.Group()
 map_sprites = pygame.sprite.Group()
+water_sprites = pygame.sprite.Group()
 block_sprites = pygame.sprite.Group()
 tank_sprites = pygame.sprite.Group()
 turret_sprites = pygame.sprite.Group()
 bullet_sprites = pygame.sprite.Group()
 zombie_sprites = pygame.sprite.Group()
-
 
 # инициализация Pygame
 pygame.init()
@@ -48,13 +48,13 @@ if __name__ == '__main__':
     surf_alpha = pygame.Surface((width, height))
 
     # генерация карты и блоков
-    map_sprite, blocks = generate_map(
+    map_sprite, blocks, waters = generate_map(
         array=read_map('level1.txt'),
         map_sprites=map_sprites,
     )
 
     block_sprites.add(*blocks)
-
+    water_sprites.add(*waters)
     # базовые настройки
     pygame.display.set_caption('Танкокалипсис')
     fps = 100
@@ -85,11 +85,9 @@ if __name__ == '__main__':
                 arrow.rect.x = -100
                 arrow.rect.y = -100
 
-        tank_sprites.update(keys, mouse_x, mouse_y, block_sprites, turret, zombie_sprites)
-        # turret.update()
+        tank_sprites.update(keys, mouse_x, mouse_y, block_sprites, turret, zombie_sprites, water_sprites)
         # отрисовка карты
         map_sprite.draw(surf_alpha)
-        # block_sprites.draw(surf_alpha)22
 
         # отрисовка игровых объектов
         screen.blit(surf_alpha, (0, 0))
@@ -97,14 +95,9 @@ if __name__ == '__main__':
             screen.blit(zombie.surf, zombie.rect)
         screen.blit(tank.surf, tank.rect)
         screen.blit(turret.surf, turret.rect)
-        # for bullet in tank.bullets:
-        #     bullet = Bullet(
-        #         bullet_sprites, bullet[0], bullet[1], bullet[2], bullet[3],
-        #     )
         tank.draw_hp(screen, width, height)
         if tank.bullet_info:
             bullet = Bullet(bullet_sprites, *tank.bullet_info)
-            # bullet.rotate()
         for bullet in bullet_sprites:
             screen.blit(bullet.surf, bullet.rect)
         bullet_sprites.update(block_sprites, clock)

@@ -152,6 +152,13 @@ class Tank(pygame.sprite.Sprite):
                 self.rect.x = self.old_x
                 self.rect.y = self.old_y
 
+    def water_collide(self, water_sprites):
+        self.mask = pygame.mask.from_surface(self.surf)
+        for elem in water_sprites:
+            if pygame.sprite.collide_mask(self, elem):
+                self.rect.x = self.old_x
+                self.rect.y = self.old_y
+
     def zombie_collide(self, zombie_sprites):
         self.mask = pygame.mask.from_surface(self.surf)
         for elem in zombie_sprites:
@@ -160,7 +167,7 @@ class Tank(pygame.sprite.Sprite):
                     self.hp -= 1
                     elem.killed = True
                     elem.surf = pygame.transform.smoothscale(
-                load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
+                        load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
                     elem.start = pygame.time.get_ticks()
 
     def draw_hp(self, screen, width, height):
@@ -174,7 +181,7 @@ class Tank(pygame.sprite.Sprite):
         pygame.draw.rect(screen, (255, 0, 0), (text_x - 10, text_y - 10,
                                                text_w + 20, text_h + 20), 1)
 
-    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites):
+    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites, water_sprites):
         # логика скорости
         self.control_speed(keys)
 
@@ -187,6 +194,10 @@ class Tank(pygame.sprite.Sprite):
         # проверка столкновений с блоками
 
         self.block_collide(block_sprites)
+
+        # проверка столкновений с водой
+
+        self.water_collide(water_sprites)
 
         # проверка столкновений с зомби
 
