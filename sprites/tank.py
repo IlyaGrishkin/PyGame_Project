@@ -79,32 +79,40 @@ class Tank(pygame.sprite.Sprite):
         else:
             self.tank_rotation_speed_actual = self.tank_rotation_speed
 
-    def control_rotation(self, keys):
+    def control_rotation(self, keys, block_sprites, water_sprites):
+        tank_angle_change = 0
         if self.current_speed < 0:  # если движение назад, то инвертированный поворот
             if keys[pygame.K_w]:
                 if (keys[pygame.K_a] and keys[pygame.K_w]):
-                    self.tank_angle -= self.tank_rotation_speed_actual * 0.3
+                    tank_angle_change = -self.tank_rotation_speed_actual * 0.3
                 if (keys[pygame.K_d] and keys[pygame.K_w]):
-                    self.tank_angle += self.tank_rotation_speed_actual * 0.3
+                    tank_angle_change = self.tank_rotation_speed_actual * 0.3
             else:
                 if keys[pygame.K_a]:
-                    self.tank_angle += self.tank_rotation_speed_actual  # повернуть влево
+                    tank_angle_change = self.tank_rotation_speed_actual  # повернуть влево
                 if keys[pygame.K_d]:
-                    self.tank_angle -= self.tank_rotation_speed_actual  # повернуть вправо
+                    tank_angle_change = -self.tank_rotation_speed_actual  # повернуть вправо
         else:  # если движение вперед, то обычный поворот
             if keys[pygame.K_s]:
                 if (keys[pygame.K_a] and keys[pygame.K_s]):
-                    self.tank_angle += self.tank_rotation_speed_actual * 0.3
+                    tank_angle_change = self.tank_rotation_speed_actual * 0.3
                 if (keys[pygame.K_d] and keys[pygame.K_s]):
-                    self.tank_angle -= self.tank_rotation_speed_actual * 0.3
+                    tank_angle_change = -self.tank_rotation_speed_actual * 0.3
             else:
                 if keys[pygame.K_a]:
-                    self.tank_angle -= self.tank_rotation_speed_actual  # повернуть влево
+                    tank_angle_change = -self.tank_rotation_speed_actual  # повернуть влево
                 if keys[pygame.K_d]:
-                    self.tank_angle += self.tank_rotation_speed_actual  # повернуть вправо
-        rotate_degrees = -math.degrees(self.tank_angle)
-        self.surf = pygame.transform.rotate(self.og_surf, rotate_degrees)
-        self.rect = self.surf.get_rect(center=self.rect.center)
+                    tank_angle_change = self.tank_rotation_speed_actual  # повернуть вправо
+        test_surf = self.og_surf
+        test_tank_angle = self.tank_angle
+        test_tank_angle += tank_angle_change
+        rotate_degrees = -math.degrees(test_tank_angle)
+        test_surf = pygame.transform.rotate(test_surf, rotate_degrees)
+        if not self.block_collide(block_sprites, surface=test_surf) and not self.water_collide(water_sprites, surface=test_surf):
+            self.tank_angle += tank_angle_change
+            rotate_degrees = -math.degrees(self.tank_angle)
+            self.surf = pygame.transform.rotate(self.og_surf, rotate_degrees)
+            self.rect = self.surf.get_rect(center=self.rect.center)
 
     def move_tank(self):
         self.old_x = self.rect.x
@@ -145,19 +153,25 @@ class Tank(pygame.sprite.Sprite):
             self.last_shot_time = current_time
             return [end_x, end_y, bullet_dx, bullet_dy, turret.angle]
 
-    def block_collide(self, block_sprites):
-        self.mask = pygame.mask.from_surface(self.surf)
+    def block_collide(self, block_sprites, surface=None):
+        if surface is None:
+            surface = self.surf
+        self.mask = pygame.mask.from_surface(surface)
         for elem in block_sprites:
             if pygame.sprite.collide_mask(self, elem):
                 self.rect.x = self.old_x
                 self.rect.y = self.old_y
+                return True
 
-    def water_collide(self, water_sprites):
-        self.mask = pygame.mask.from_surface(self.surf)
+    def water_collide(self, water_sprites, surface=None):
+        if surface is None:
+            surface = self.surf
+        self.mask = pygame.mask.from_surface(surface)
         for elem in water_sprites:
             if pygame.sprite.collide_mask(self, elem):
                 self.rect.x = self.old_x
                 self.rect.y = self.old_y
+                return True
 
     def zombie_collide(self, zombie_sprites):
         self.mask = pygame.mask.from_surface(self.surf)
@@ -189,7 +203,7 @@ class Tank(pygame.sprite.Sprite):
         self.control_rotation_speed(keys)
 
         # управление поворотом танка
-        self.control_rotation(keys)
+        self.control_rotation(keys, block_sprites, water_sprites)
 
         # проверка столкновений с блоками
 
@@ -216,13 +230,7 @@ class Tank(pygame.sprite.Sprite):
 
         # логика стрельбы
         self.bullet_info = self.shoot_bullet(keys, turret=turret)
-
-        # проверка столкновений с блоками
-        # for block in block_sprites:
-        #     if pygame.sprite.collide_mask(self, block):
-        #         self.rect.x -= self.current_speed * math.sin(self.tank_angle)
-        #         self.rect.y -= self.current_speed * math.cos(self.tank_angle)
-
+ 
 
 class Turret(pygame.sprite.Sprite):
     def __init__(self, group, tank: Tank):

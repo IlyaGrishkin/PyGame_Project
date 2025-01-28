@@ -1,5 +1,5 @@
 from pickletools import pyfloat
-
+import random
 import pygame
 
 from common import load_image
@@ -33,7 +33,7 @@ class Zombie(pygame.sprite.Sprite):
         if self.time > 3:
             self.kill()
 
-    def update(self, bullet_sprites, tank_sprites):
+    def update(self, bullet_sprites, tank, block_sprites, water_sprites):
         if pygame.sprite.spritecollideany(self, bullet_sprites) and not self.killed:
             self.killed = True
             self.start = pygame.time.get_ticks()
@@ -41,3 +41,20 @@ class Zombie(pygame.sprite.Sprite):
                 load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
         if self.killed:
             self.zombie_kill(self.start)
+        
+        else:
+            test_surf = self.og_surf
+            if tank.rect.x > self.rect.x and tank.rect.y > self.rect.y:
+                self.rect.x += 1 * random.random()
+                self.rect.y += 1 * random.random()
+            elif tank.rect.x < self.rect.x and tank.rect.y > self.rect.y:
+                self.rect.x -= 1 * random.random()
+                self.rect.y += 1 * random.random()
+            elif tank.rect.x > self.rect.x and tank.rect.y < self.rect.y:
+                self.rect.x += 1 * random.random()
+                self.rect.y -= 1 * random.random()
+            elif tank.rect.x < self.rect.x and tank.rect.y < self.rect.y:
+                self.rect.x -= 1 * random.random()
+                self.rect.y -= 1 * random.random()
+            
+        

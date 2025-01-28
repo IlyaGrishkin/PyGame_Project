@@ -68,7 +68,7 @@ if __name__ == '__main__':
     arrow = Arrow()
 
     for i in range(10):
-        zombie = Zombie(zombie_sprites, randint(10, 700), randint(10, 600))
+        zombie = Zombie(zombie_sprites, randint(600, 700), randint(500, 600))
 
     # игровой цикл
     while running:
@@ -103,7 +103,7 @@ if __name__ == '__main__':
         bullet_sprites.update(block_sprites, clock)
 
         map_sprite.update()
-        zombie_sprites.update(bullet_sprites, tank_sprites)
+        zombie_sprites.update(bullet_sprites, tank, block_sprites, water_sprites)
         arrow_sprites.draw(screen)
         if tank.hp == 0:
             print('Вы проиграли!')
