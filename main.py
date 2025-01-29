@@ -22,8 +22,40 @@ zombie_sprites = pygame.sprite.Group()
 pygame.init()
 size = width, height = 1080, 720
 screen = pygame.display.set_mode(size)
+clock = pygame.time.Clock()
+fps = 100
 if True:
     from common import load_image
+
+
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+
+def fon_screen(intro_text):
+    fon = pygame.transform.scale(load_image('start.jpg'), (width, height))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(fps)
 
 
 # прицел
@@ -43,6 +75,11 @@ class Arrow(pygame.sprite.Sprite):
         self.rect.y = y
 
 
+intro_text = ["Танкокалипсис", "",
+              "Правила игры",
+              "Уничтожь всех зомби на уровне!",
+              "Не дай зомби к тебе прикоснуться"]
+fon_screen(intro_text)
 if __name__ == '__main__':
 
     surf_alpha = pygame.Surface((width, height))
@@ -57,8 +94,6 @@ if __name__ == '__main__':
     water_sprites.add(*waters)
     # базовые настройки
     pygame.display.set_caption('Танкокалипсис')
-    fps = 100
-    clock = pygame.time.Clock()
     running = True
     pygame.mouse.set_visible(False)
 
@@ -106,7 +141,10 @@ if __name__ == '__main__':
         zombie_sprites.update(bullet_sprites, tank, block_sprites, water_sprites)
         arrow_sprites.draw(screen)
         if tank.hp == 0:
-            print('Вы проиграли!')
+            intro_text = ["Танкокалипсис", "",
+                          "О нет",
+                          "ты проиграл!"]
+            fon_screen(intro_text)
             running = False
         pygame.display.flip()
         clock.tick(fps)
