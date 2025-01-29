@@ -92,7 +92,7 @@ if __name__ == '__main__':
 
     block_sprites.add(*blocks)
     water_sprites.add(*waters)
-    # базовые настройки
+    # базовые настройкиas
     pygame.display.set_caption('Танкокалипсис')
     running = True
     pygame.mouse.set_visible(False)
@@ -102,9 +102,9 @@ if __name__ == '__main__':
     turret = Turret(turret_sprites, tank=tank)
     arrow = Arrow()
 
-    for i in range(40):
-        zombie = Zombie(zombie_sprites, randint(300, 700),
-                        randint(500, 600), speed=random.choice([1, 1.3]))
+    # for i in range(40):
+    #     zombie = Zombie(zombie_sprites, randint(300, 700), randint(
+    #         500, 600), speed=random.choice([1, 1.3]))
 
     # игровой цикл
     while running:

@@ -30,7 +30,7 @@ class Tank(pygame.sprite.Sprite):
         self.old_y = self.rect.y
         self.hp = 3
         # длина ствола
-        self.barrel_length = 30
+        self.barrel_length = 1
 
         # скорость вращения башни
         self.turret_rotation_speed = 0.03
@@ -136,8 +136,8 @@ class Tank(pygame.sprite.Sprite):
         turret.angle %= 2 * math.pi
         rotate_degrees = math.degrees(turret.angle) - 90
         turret.surf = pygame.transform.rotate(turret.og_surf, rotate_degrees)
-        turret.rect.x = self.rect.center[0]
-        turret.rect.y = self.rect.center[1]
+        turret.rect.x = self.rect.center[0] + 10 * math.sin(self.tank_angle)
+        turret.rect.y = self.rect.center[1] - 10 * math.cos(self.tank_angle)
         turret.rect = turret.surf.get_rect(
             center=(turret.rect.x, turret.rect.y))
 
@@ -260,9 +260,9 @@ class Turret(pygame.sprite.Sprite):
         self.angle = 0
         self.change_angle = 0
 
-    def update(self):
-        self.rect.x = self.tank.rect.x
-        self.rect.y = self.tank.rect.y
+    def update(self, tank: Tank):
+        self.rect.x = self.tank.rect.x + math.sin(tank.tank_angle)
+        self.rect.y = self.tank.rect.y - math.cos(tank.tank_angle)
 
 
 class Bullet(pygame.sprite.Sprite):
