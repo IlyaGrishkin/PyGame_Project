@@ -7,7 +7,7 @@ from common import load_image
 
 
 class Zombie(pygame.sprite.Sprite):
-    def __init__(self, group, x, y):
+    def __init__(self, group, x, y, speed):
         super().__init__(group)
         self.image = load_image("zombie.png")
         self.blood_image = load_image("blood.png")
@@ -21,6 +21,7 @@ class Zombie(pygame.sprite.Sprite):
         self.change_angle = 0
         self.time = 150
         self.killed = False
+        self.speed = speed
         self.mask = pygame.mask.from_surface(self.image)
 
     def rot(self):
@@ -45,21 +46,21 @@ class Zombie(pygame.sprite.Sprite):
             test_rect.x += 1  # Минимальное движение вправо
             if not self.block_collide(block_sprites, test_rect):
 
-                self.rect.x += 1  # Минимальное движение вправо
+                self.rect.x += self.speed  # Минимальное движение вправо
 
         elif tank.rect.x < self.rect.x:
             test_rect.x -= 1  # Минимальное движение влево
             if not self.block_collide(block_sprites, test_rect):
-                self.rect.x -= 1  # Минимальное движение влево
+                self.rect.x -= self.speed  # Минимальное движение влево
 
         if tank.rect.y > self.rect.y:
             test_rect.y += 1  # Минимальное движение вниз
             if not self.block_collide(block_sprites, test_rect):
-                self.rect.y += 1  # Минимальное движение вниз
+                self.rect.y += self.speed  # Минимальное движение вниз
         elif tank.rect.y < self.rect.y:
             test_rect.y -= 1  # Минимальное движение вверх
             if not self.block_collide(block_sprites, test_rect):
-                self.rect.y -= 1  # Минимальное движение вверх
+                self.rect.y -= self.speed  # Минимальное движение вверх
 
             # Случайное движение для разнообразия
         if random.random() < 0.5:

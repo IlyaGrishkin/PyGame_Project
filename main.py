@@ -103,7 +103,8 @@ if __name__ == '__main__':
     arrow = Arrow()
 
     for i in range(40):
-        zombie = Zombie(zombie_sprites, randint(300, 700), randint(500, 600))
+        zombie = Zombie(zombie_sprites, randint(300, 700),
+                        randint(500, 600), speed=random.choice([1, 1.3]))
 
     # игровой цикл
     while running:
@@ -143,7 +144,7 @@ if __name__ == '__main__':
         zombie_sprites.update(bullet_sprites, tank,
                               block_sprites, water_sprites)
         arrow_sprites.draw(screen)
-        if tank.hp == 0:
+        if tank.hp <= 0:
             intro_text = ["Танкокалипсис", "",
                           "О нет",
                           "ты проиграл!"]
