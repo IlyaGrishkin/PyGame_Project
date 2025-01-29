@@ -10,7 +10,7 @@ class Zombie(pygame.sprite.Sprite):
     def __init__(self, group, x, y, speed):
         super().__init__(group)
         self.image = load_image("zombie.png")
-        self.blood_image = load_image("blood.png")
+        self.blood_image = load_image("blood.png", colorkey=-1)
         self.og_surf = pygame.transform.smoothscale(
             load_image("zombie.png", (0, 0, 0)).convert(), (40, 48))
         self.surf = self.og_surf
@@ -97,7 +97,7 @@ class Zombie(pygame.sprite.Sprite):
             self.killed = True
             self.start = pygame.time.get_ticks()
             self.surf = pygame.transform.smoothscale(
-                load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
+                self.blood_image.convert(), (40, 48))
         if self.killed:
             self.zombie_kill(self.start)
         else:
