@@ -34,10 +34,10 @@ def terminate():
 
 
 def fon_screen(intro_text):
-    fon = pygame.transform.scale(load_image('start.jpg'), (width, height))
+    fon = pygame.transform.scale(load_image('start.png'), (width, height))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 50
+    text_coord = 10
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('white'))
         intro_rect = string_rendered.get_rect()
@@ -75,8 +75,8 @@ class Arrow(pygame.sprite.Sprite):
         self.rect.y = y
 
 
-intro_text = ["Танкокалипсис", "",
-              "Правила игры",
+intro_text = ["Танкокалипсис", "", "", "",
+              "Правила игры:",
               "Уничтожь всех зомби на уровне!",
               "Не дай зомби к тебе прикоснуться"]
 fon_screen(intro_text)
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     turret = Turret(turret_sprites, tank=tank)
     arrow = Arrow()
 
-    for i in range(10):
+    for i in range(40):
         zombie = Zombie(zombie_sprites, randint(300, 700), randint(500, 600))
 
     # игровой цикл
@@ -120,7 +120,8 @@ if __name__ == '__main__':
                 arrow.rect.x = -100
                 arrow.rect.y = -100
 
-        tank_sprites.update(keys, mouse_x, mouse_y, block_sprites, turret, zombie_sprites, water_sprites)
+        tank_sprites.update(keys, mouse_x, mouse_y, block_sprites,
+                            turret, zombie_sprites, water_sprites)
         # отрисовка карты
         map_sprite.draw(surf_alpha)
 
@@ -130,7 +131,8 @@ if __name__ == '__main__':
             screen.blit(zombie.surf, zombie.rect)
         screen.blit(tank.surf, tank.rect)
         screen.blit(turret.surf, turret.rect)
-        tank.draw_hp(screen, width, height)
+        tank.draw_hp(screen)
+        tank.show_cooldown(screen)
         if tank.bullet_info:
             bullet = Bullet(bullet_sprites, *tank.bullet_info)
         for bullet in bullet_sprites:
@@ -138,7 +140,8 @@ if __name__ == '__main__':
         bullet_sprites.update(block_sprites, clock)
 
         map_sprite.update()
-        zombie_sprites.update(bullet_sprites, tank, block_sprites, water_sprites)
+        zombie_sprites.update(bullet_sprites, tank,
+                              block_sprites, water_sprites)
         arrow_sprites.draw(screen)
         if tank.hp == 0:
             intro_text = ["Танкокалипсис", "",

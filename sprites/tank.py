@@ -62,7 +62,7 @@ class Tank(pygame.sprite.Sprite):
             self.last_direction = 1
         elif keys[pygame.K_s]:
             self.current_speed = max(
-                self.current_speed - self.acceleration, -self.max_speed)
+                self.current_speed - self.acceleration, -(self.max_speed / 1.7))
             self.moving_forward = False
             self.last_direction = -1
         else:
@@ -108,7 +108,7 @@ class Tank(pygame.sprite.Sprite):
         test_tank_angle += tank_angle_change
         rotate_degrees = -math.degrees(test_tank_angle)
         test_surf = pygame.transform.rotate(test_surf, rotate_degrees)
-        if not self.block_collide(block_sprites, surface=test_surf) and not self.water_collide(water_sprites, surface=test_surf):
+        if not self.block_collide(block_sprites, surface=test_surf):
             self.tank_angle += tank_angle_change
             rotate_degrees = -math.degrees(self.tank_angle)
             self.surf = pygame.transform.rotate(self.og_surf, rotate_degrees)
@@ -147,9 +147,9 @@ class Tank(pygame.sprite.Sprite):
             bullet_dx = self.bullet_speed * math.cos(turret.angle)
             bullet_dy = -self.bullet_speed * math.sin(turret.angle)
             end_x = (turret.rect.x + 5) + \
-                    self.barrel_length * math.cos(turret.angle)
+                self.barrel_length * math.cos(turret.angle)
             end_y = (turret.rect.y + 5) - \
-                    self.barrel_length * math.sin(turret.angle)
+                self.barrel_length * math.sin(turret.angle)
             self.last_shot_time = current_time
             return [end_x, end_y, bullet_dx, bullet_dy, turret.angle]
 
@@ -167,11 +167,17 @@ class Tank(pygame.sprite.Sprite):
         if surface is None:
             surface = self.surf
         self.mask = pygame.mask.from_surface(surface)
-        for elem in water_sprites:
-            if pygame.sprite.collide_mask(self, elem):
-                self.rect.x = self.old_x
-                self.rect.y = self.old_y
-                return True
+        if any(pygame.sprite.collide_mask(self, elem) for elem in water_sprites):
+            # self.rect.x = self.old_x
+            # self.rect.y = self.old_y
+            # return True
+            self.acceleration = 0.02
+            self.tank_rotation_speed_stationary = 0.03
+            self.max_speed = 1
+        else:
+            self.acceleration = 0.08
+            self.tank_rotation_speed_stationary = 0.06
+            self.max_speed = 3
 
     def zombie_collide(self, zombie_sprites):
         self.mask = pygame.mask.from_surface(self.surf)
@@ -184,7 +190,7 @@ class Tank(pygame.sprite.Sprite):
                         load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
                     elem.start = pygame.time.get_ticks()
 
-    def draw_hp(self, screen, width, height):
+    def draw_hp(self, screen):
         font = pygame.font.Font(None, 50)
         text = font.render('Здоровье: ' + str(self.hp), True, (255, 0, 0))
         text_x = 20
@@ -194,6 +200,15 @@ class Tank(pygame.sprite.Sprite):
         screen.blit(text, (text_x, text_y))
         pygame.draw.rect(screen, (255, 0, 0), (text_x - 10, text_y - 10,
                                                text_w + 20, text_h + 20), 1)
+
+    def show_cooldown(self, screen):
+        current_time = time.time()
+        if current_time - self.last_shot_time < self.reload_time:
+            cooldown_text = f"{self.reload_time -
+                               (current_time - self.last_shot_time):.2f}s"
+            font = pygame.font.SysFont(None, 30)
+            text = font.render(cooldown_text, True, (255, 255, 255))
+            screen.blit(text, (self.rect.x, self.rect.y - 30))
 
     def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites, water_sprites):
         # логика скорости
@@ -230,7 +245,7 @@ class Tank(pygame.sprite.Sprite):
 
         # логика стрельбы
         self.bullet_info = self.shoot_bullet(keys, turret=turret)
- 
+
 
 class Turret(pygame.sprite.Sprite):
     def __init__(self, group, tank: Tank):

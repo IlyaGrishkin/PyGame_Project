@@ -1,3 +1,4 @@
+import math
 from pickletools import pyfloat
 import random
 import pygame
@@ -24,8 +25,6 @@ class Zombie(pygame.sprite.Sprite):
 
     def rot(self):
         self.surf = pygame.transform.rotate(self.og_surf, self.angle)
-        self.angle += self.change_angle
-        self.angle = self.angle % 360
         self.rect = self.surf.get_rect(center=self.rect.center)
 
     def zombie_kill(self, start):
@@ -39,9 +38,9 @@ class Zombie(pygame.sprite.Sprite):
                 return True
         return False
 
-
     def level1_zombi(self, tank, block_sprites):
         test_rect = self.rect.copy()
+
         if tank.rect.x > self.rect.x:
             test_rect.x += 1  # Минимальное движение вправо
             if not self.block_collide(block_sprites, test_rect):
@@ -60,40 +59,37 @@ class Zombie(pygame.sprite.Sprite):
         elif tank.rect.y < self.rect.y:
             test_rect.y -= 1  # Минимальное движение вверх
             if not self.block_collide(block_sprites, test_rect):
-                    self.rect.y -= 1  # Минимальное движение вверх
-
+                self.rect.y -= 1  # Минимальное движение вверх
 
             # Случайное движение для разнообразия
         if random.random() < 0.5:
-                if random.random() < 0.5:
-                    test_rect.x += 2 * random.random() - 1
-                    if not self.block_collide(block_sprites, test_rect):
-                        self.rect.x += 2 * random.random() - 1
-                    else:
-                        self.rect.x -= 6 * random.random() - 1
+            if random.random() < 0.5:
+                test_rect.x += 2 * random.random() - 1
+                if not self.block_collide(block_sprites, test_rect):
+                    self.rect.x += 2 * random.random() - 1
                 else:
-                    test_rect.x -= 2 * random.random() - 1
-                    if not self.block_collide(block_sprites, test_rect):
+                    self.rect.x -= 6 * random.random() - 1
+            else:
+                test_rect.x -= 2 * random.random() - 1
+                if not self.block_collide(block_sprites, test_rect):
 
-                        self.rect.x -= 2 * random.random() - 1
-                    else:
-                        self.rect.x += 6 * random.random() - 1
+                    self.rect.x -= 2 * random.random() - 1
+                else:
+                    self.rect.x += 6 * random.random() - 1
         else:
-                if random.random() < 0.5:
-                    test_rect.y += 2 * random.random() - 1
-                    if not self.block_collide(block_sprites, test_rect):
-                        self.rect.y += 2 * random.random() - 1
-                    else:
-                        self.rect.y -= 6 * random.random() - 1
+            if random.random() < 0.5:
+                test_rect.y += 2 * random.random() - 1
+                if not self.block_collide(block_sprites, test_rect):
+                    self.rect.y += 2 * random.random() - 1
                 else:
-                    test_rect.y -= 2 * random.random() - 1
-                    if not self.block_collide(block_sprites, test_rect):
+                    self.rect.y -= 6 * random.random() - 1
+            else:
+                test_rect.y -= 2 * random.random() - 1
+                if not self.block_collide(block_sprites, test_rect):
 
-                        self.rect.y -= 2 * random.random() - 1
-                    else:
-                        self.rect.y += 6 * random.random() - 1
-
-
+                    self.rect.y -= 2 * random.random() - 1
+                else:
+                    self.rect.y += 6 * random.random() - 1
 
     def update(self, bullet_sprites, tank, block_sprites, water_sprites):
         if pygame.sprite.spritecollideany(self, bullet_sprites) and not self.killed:
@@ -103,8 +99,9 @@ class Zombie(pygame.sprite.Sprite):
                 load_image("blood.png", (0, 0, 0)).convert(), (40, 48))
         if self.killed:
             self.zombie_kill(self.start)
-        
         else:
             self.level1_zombi(tank, block_sprites)
-
-        
+            rad = math.atan2(tank.rect.y - self.rect.y,
+                             tank.rect.x - self.rect.x)
+            self.angle = 270 - math.degrees(rad)
+            self.rot()
