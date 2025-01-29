@@ -103,7 +103,7 @@ if __name__ == '__main__':
     arrow = Arrow()
 
     for i in range(10):
-        zombie = Zombie(zombie_sprites, randint(600, 700), randint(500, 600))
+        zombie = Zombie(zombie_sprites, randint(300, 700), randint(500, 600))
 
     # игровой цикл
     while running:
