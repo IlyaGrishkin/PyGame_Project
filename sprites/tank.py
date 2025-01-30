@@ -188,6 +188,7 @@ class Tank(pygame.sprite.Sprite):
                     elem.killed = True
                     elem.surf = pygame.transform.smoothscale(
                         elem.blood_image.convert(), (40, 48))
+                    elem.zombies_list.remove(elem)
                     elem.start = pygame.time.get_ticks()
 
     def draw_hp(self, screen):
@@ -204,8 +205,7 @@ class Tank(pygame.sprite.Sprite):
     def show_cooldown(self, screen):
         current_time = time.time()
         if current_time - self.last_shot_time < self.reload_time:
-            cooldown_text = f"{self.reload_time -
-                               (current_time - self.last_shot_time):.2f}s"
+            cooldown_text = f"{self.reload_time - (current_time - self.last_shot_time):.2f}s"
             font = pygame.font.SysFont(None, 30)
             text = font.render(cooldown_text, True, (255, 255, 255))
             screen.blit(text, (self.rect.x, self.rect.y - 30))
