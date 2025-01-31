@@ -115,7 +115,6 @@ if __name__ == '__main__':
 
             keys = pygame.key.get_pressed()
             mouse_x, mouse_y = pygame.mouse.get_pos()
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
