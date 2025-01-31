@@ -235,6 +235,7 @@ class ZombieBoss(pygame.sprite.Sprite):
                          pointX - self.rect.x)
         self.angle = 270 - math.degrees(rad)
         self.rot()
+        self.mask = pygame.mask.from_surface(self.surf)
 
     def zombie_kill(self, start):
         self.time = (pygame.time.get_ticks() - start) / 1000
@@ -308,12 +309,13 @@ class ZombieBoss(pygame.sprite.Sprite):
         return random.choice(points)
 
     def level1_zombi(self, tank, block_sprites):
-
         if self.tank_nearby(tank, 220):
 
             self.zombie_move(tank.rect.x, tank.rect.y, block_sprites)
+            self.speed = 1.3
 
         else:
+
             if abs(self.next_point[0] - self.rect.x) <= 10 and abs(self.next_point[1] - self.rect.y) <= 10:
                 self.next_point = self.gen_next_point(
                     *self.next_point)  # (random.randint(0, 1080), random.randint(0, 720))
@@ -321,6 +323,7 @@ class ZombieBoss(pygame.sprite.Sprite):
             # print(self.rect.x, self.rect.y)
             print(self.next_point)
             self.zombie_move(self.next_point[0], self.next_point[1], block_sprites)
+            self.speed = 1
 
     def handle_bullet_collide(self, bullet_sprites):
         if not self.killed:

@@ -113,6 +113,7 @@ if __name__ == '__main__':
                     550, 600), speed=random.choice([1.1, 1.7]))
                 zombies_list.append(zombie)
             zombie_boss = ZombieBoss(zombieBoss_sprites, 600, 380, 1)
+            zombies_list.append(zombie_boss)
 
 
         intro_text = ["Танкокалипсис", "", "", "",
