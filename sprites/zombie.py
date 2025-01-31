@@ -14,6 +14,11 @@ class Zombie(pygame.sprite.Sprite):
         self.blood_image = load_image("blood.png", colorkey=-1)
         self.og_surf = pygame.transform.smoothscale(
             load_image("zombie.png", (0, 0, 0)).convert(), (40, 48))
+        self.zombie_kill_sound = pygame.mixer.Sound('data/zombie_kill.wav')
+        self.zombie_kill_sound.set_volume(0.5)
+        self.zombie_nearby_sound = pygame.mixer.Sound('data/zombie_nearby.wav')
+        self.zombie_nearby_sound.set_volume(0.3)
+        self.sound_played = False
         self.surf = self.og_surf
         self.rect = self.surf.get_rect()
         self.angle = 0
@@ -138,7 +143,9 @@ class Zombie(pygame.sprite.Sprite):
     def level1_zombi(self, tank, block_sprites):
 
         if self.tank_nearby(tank, 150):
-
+            if not self.sound_played:
+                self.zombie_nearby_sound.play()
+                self.sound_played = True
             self.zombie_move(tank.rect.x, tank.rect.y, block_sprites)
 
         else:
@@ -147,6 +154,7 @@ class Zombie(pygame.sprite.Sprite):
                 self.rotate_zombie_sprite(*self.next_point)
 
             self.zombie_move(self.next_point[0], self.next_point[1], block_sprites)
+            self.sound_played = False
 
         """
         
@@ -187,6 +195,7 @@ class Zombie(pygame.sprite.Sprite):
     def update(self, bullet_sprites, tank, block_sprites, water_sprites):
         if pygame.sprite.spritecollideany(self, bullet_sprites) and not self.killed:
             self.killed = True
+            self.zombie_kill_sound.play()
             self.start = pygame.time.get_ticks()
             self.surf = pygame.transform.smoothscale(
                 self.blood_image.convert(), (40, 48))

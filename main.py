@@ -69,7 +69,8 @@ class Arrow(pygame.sprite.Sprite):
 if __name__ == '__main__':
 
     surf_alpha = pygame.Surface((width, height))
-
+    pygame.mixer.music.load('data/soundtrack.mp3')
+    pygame.mixer.music.play(-1)
 
     def level_run(level):
         map_sprites = pygame.sprite.Group()
@@ -100,13 +101,13 @@ if __name__ == '__main__':
         turret = Turret(turret_sprites, tank=tank)
         arrow = Arrow()
 
-        if level == 0:
+        if level == 1:
             for i in range(5):
 
                 zombie = Zombie(zombie_sprites, zombies_list, randint(300, 700), randint(
                     500, 600), speed=random.choice([1, 1.3]))
                 zombies_list.append(zombie)
-        elif level == 1:
+        elif level == 2:
             for i in range(1):
                 zombie = Zombie(zombie_sprites, zombies_list, randint(100, 700), randint(
                     550, 600), speed=random.choice([1.1, 1.7]))
@@ -143,7 +144,8 @@ if __name__ == '__main__':
             screen.blit(surf_alpha, (0, 0))
             for zombie in zombie_sprites:
                 screen.blit(zombie.surf, zombie.rect)
-            screen.blit(zombie_boss.surf, zombie_boss.rect)
+            if level == 2:
+                screen.blit(zombie_boss.surf, zombie_boss.rect)
             screen.blit(tank.surf, tank.rect)
             screen.blit(turret.surf, turret.rect)
             tank.draw_hp(screen)

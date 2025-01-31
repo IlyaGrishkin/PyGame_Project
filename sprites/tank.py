@@ -12,6 +12,16 @@ class Tank(pygame.sprite.Sprite):
         super().__init__(group)
         self.og_surf = pygame.transform.smoothscale(load_image(
             "tank.png", colorkey=(0, 255, 0)).convert(), (60, 111))
+        self.shoot_sound = pygame.mixer.Sound('data/shoot.wav')
+        self.shoot_sound.set_volume(0.5)
+        self.move_sound = pygame.mixer.Sound('data/move.wav')
+        self.move_sound.set_volume(0.5)
+        self.zombie_kill_sound = pygame.mixer.Sound('data/zombie_kill.wav')
+        self.shoot_chanel = pygame.mixer.find_channel()
+        self.shoot_chanel.play(self.move_sound,-1)
+        self.shoot_chanel.pause()
+        self.moved = False
+        self.rotated = False
         self.surf = self.og_surf
         self.rect = self.surf.get_rect()
         self.tank_angle = 0
@@ -80,6 +90,7 @@ class Tank(pygame.sprite.Sprite):
             self.tank_rotation_speed_actual = self.tank_rotation_speed
 
     def control_rotation(self, keys, block_sprites, water_sprites):
+        tank_angle_change_old = 0
         tank_angle_change = 0
         if self.current_speed < 0:  # если движение назад, то инвертированный поворот
             if keys[pygame.K_w]:
@@ -113,6 +124,10 @@ class Tank(pygame.sprite.Sprite):
             rotate_degrees = -math.degrees(self.tank_angle)
             self.surf = pygame.transform.rotate(self.og_surf, rotate_degrees)
             self.rect = self.surf.get_rect(center=self.rect.center)
+        if tank_angle_change_old != tank_angle_change:
+            self.rotated = True
+        else:
+            self.rotated = False
 
     def move_tank(self):
         self.old_x = self.rect.x
@@ -123,6 +138,10 @@ class Tank(pygame.sprite.Sprite):
             self.rect.x = new_x
         if -40 <= new_y <= 750 - self.rect.height:
             self.rect.y = new_y
+        if self.old_x == new_x and self.old_y == new_y:
+            self.moved = False
+        else:
+            self.moved = True
 
     def rotate_turret(self, mouse_x, mouse_y, turret: "Turret"):
         desired_angle = math.atan2(
@@ -147,10 +166,11 @@ class Tank(pygame.sprite.Sprite):
             bullet_dx = self.bullet_speed * math.cos(turret.angle)
             bullet_dy = -self.bullet_speed * math.sin(turret.angle)
             end_x = (turret.rect.x + 5) + \
-                self.barrel_length * math.cos(turret.angle)
+                    self.barrel_length * math.cos(turret.angle)
             end_y = (turret.rect.y + 5) - \
-                self.barrel_length * math.sin(turret.angle)
+                    self.barrel_length * math.sin(turret.angle)
             self.last_shot_time = current_time
+            self.shoot_sound.play()
             return [end_x, end_y, bullet_dx, bullet_dy, turret.angle]
 
     def block_collide(self, block_sprites, surface=None):
@@ -186,6 +206,7 @@ class Tank(pygame.sprite.Sprite):
                 if not elem.killed:
                     self.hp -= 1
                     elem.killed = True
+                    self.zombie_kill_sound.play()
                     elem.surf = pygame.transform.smoothscale(
                         elem.blood_image.convert(), (40, 48))
                     elem.zombies_list.remove(elem)
@@ -246,6 +267,12 @@ class Tank(pygame.sprite.Sprite):
         # перемещение танка
         self.move_tank()
 
+        if self.moved or self.rotated:
+            self.shoot_chanel.unpause()
+            print(self.moved, self.rotated)
+        else:
+            self.shoot_chanel.pause()
+            print('stop')
         # turret.update()
 
         # управление поворотом башни
