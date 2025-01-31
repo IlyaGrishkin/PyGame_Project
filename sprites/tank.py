@@ -173,7 +173,7 @@ class Tank(pygame.sprite.Sprite):
             # return True
             self.acceleration = 0.02
             self.tank_rotation_speed_stationary = 0.03
-            self.max_speed = 1
+            self.max_speed = 1.5
         else:
             self.acceleration = 0.08
             self.tank_rotation_speed_stationary = 0.06
@@ -190,6 +190,13 @@ class Tank(pygame.sprite.Sprite):
                         elem.blood_image.convert(), (40, 48))
                     elem.zombies_list.remove(elem)
                     elem.start = pygame.time.get_ticks()
+
+    def zombie_boss_collide(self, zombie_boss_sprites):
+        self.mask = pygame.mask.from_surface(self.surf)
+        for elem in zombie_boss_sprites:
+            if pygame.sprite.collide_mask(self, elem):
+                if not elem.killed:
+                    self.hp = 0
 
     def draw_hp(self, screen):
         font = pygame.font.Font(None, 50)
@@ -210,7 +217,8 @@ class Tank(pygame.sprite.Sprite):
             text = font.render(cooldown_text, True, (255, 255, 255))
             screen.blit(text, (self.rect.x, self.rect.y - 30))
 
-    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites, water_sprites):
+    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites, water_sprites,
+               zombie_boss_sprites=None):
         # логика скорости
         self.control_speed(keys)
 
@@ -231,6 +239,9 @@ class Tank(pygame.sprite.Sprite):
         # проверка столкновений с зомби
 
         self.zombie_collide(zombie_sprites)
+
+        if zombie_boss_sprites:
+            self.zombie_boss_collide(zombie_boss_sprites)
 
         # перемещение танка
         self.move_tank()

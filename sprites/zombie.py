@@ -24,6 +24,7 @@ class Zombie(pygame.sprite.Sprite):
         self.killed = False
         self.speed = speed
         self.mask = pygame.mask.from_surface(self.image)
+        self.next_point = (300, 300)
 
     def rot(self):
         self.surf = pygame.transform.rotate(self.og_surf, self.angle)
@@ -40,13 +41,12 @@ class Zombie(pygame.sprite.Sprite):
                 return True
         return False
 
-    def level1_zombi(self, tank, block_sprites):
+    def level0_zombi(self, tank, block_sprites):
         test_rect = self.rect.copy()
 
         if tank.rect.x > self.rect.x:
             test_rect.x += 1  # Минимальное движение вправо
             if not self.block_collide(block_sprites, test_rect):
-
                 self.rect.x += self.speed  # Минимальное движение вправо
 
         elif tank.rect.x < self.rect.x:
@@ -93,6 +93,97 @@ class Zombie(pygame.sprite.Sprite):
                 else:
                     self.rect.y += 6 * random.random() - 1
 
+    def tank_nearby(self, tank, distance):
+        return abs(tank.rect.x - self.rect.x) <= distance and abs(tank.rect.y - self.rect.y) <= distance
+
+    def zombie_move(self, goalX, goalY, block_sprites):
+        test_rect = self.rect.copy()
+        self.rotate_zombie_sprite(goalX, goalY)
+        if goalX >= self.rect.x and goalY >= self.rect.y:
+            test_rect.x += self.speed
+            test_rect.y += self.speed  # Минимальное движение вправо
+            if not self.block_collide(block_sprites, test_rect):
+                self.rect.x += self.speed  # Минимальное движение вправо
+                self.rect.y += self.speed
+            else:
+                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+
+        elif goalX >= self.rect.x and goalY <= self.rect.y:
+            test_rect.x += self.speed
+            test_rect.y -= self.speed
+            if not self.block_collide(block_sprites, test_rect):
+                self.rect.x += self.speed  # Минимальное движение влево
+                self.rect.y -= self.speed
+            else:
+                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+
+        elif goalX <= self.rect.x and goalY >= self.rect.y:
+            test_rect.x -= self.speed
+            test_rect.y += self.speed
+            if not self.block_collide(block_sprites, test_rect):
+                self.rect.x -= self.speed  # Минимальное движение влево            
+                self.rect.y += self.speed
+            else:
+                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+
+        else:
+            test_rect.x -= self.speed
+            test_rect.y -= self.speed
+            if not self.block_collide(block_sprites, test_rect):
+                self.rect.x -= self.speed  # Минимальное движение влево
+                self.rect.y -= self.speed
+            else:
+                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+
+    def level1_zombi(self, tank, block_sprites):
+
+        if self.tank_nearby(tank, 150):
+
+            self.zombie_move(tank.rect.x, tank.rect.y, block_sprites)
+
+        else:
+            if abs(self.next_point[0] - self.rect.x) <= 5 and abs(self.next_point[1] - self.rect.y) <= 5:
+                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+                self.rotate_zombie_sprite(*self.next_point)
+
+            self.zombie_move(self.next_point[0], self.next_point[1], block_sprites)
+
+        """
+        
+        if random.random() < 0.5:        
+            if random.random() < 0.5:
+                test_rect.x += 2 * random.random() - 1            
+                if not self.block_collide(block_sprites, test_rect):
+                    self.rect.x += 2 * random.random() - 1            
+                else:
+                    self.rect.x -= 6 * random.random() - 1        
+            else:
+                test_rect.x -= 2 * random.random() - 1            
+                if not self.block_collide(block_sprites, test_rect):
+                    self.rect.x -= 2 * random.random() - 1
+                else:                
+                    self.rect.x += 6 * random.random() - 1
+        else:        
+            if random.random() < 0.5:
+                test_rect.y += 2 * random.random() - 1            
+                if not self.block_collide(block_sprites, test_rect):
+                    self.rect.y += 2 * random.random() - 1            
+                else:
+                    self.rect.y -= 6 * random.random() - 1        
+            else:
+                test_rect.y -= 2 * random.random() - 1            
+                if not self.block_collide(block_sprites, test_rect):
+                    self.rect.y -= 2 * random.random() - 1
+                else:                
+                    self.rect.y += 6 * random.random() - 1
+        """
+
+    def rotate_zombie_sprite(self, pointX, pointY):
+        rad = math.atan2(pointY - self.rect.y,
+                         pointX - self.rect.x)
+        self.angle = 270 - math.degrees(rad)
+        self.rot()
+
     def update(self, bullet_sprites, tank, block_sprites, water_sprites):
         if pygame.sprite.spritecollideany(self, bullet_sprites) and not self.killed:
             self.killed = True
@@ -104,7 +195,139 @@ class Zombie(pygame.sprite.Sprite):
             self.zombie_kill(self.start)
         else:
             self.level1_zombi(tank, block_sprites)
-            rad = math.atan2(tank.rect.y - self.rect.y,
-                             tank.rect.x - self.rect.x)
-            self.angle = 270 - math.degrees(rad)
-            self.rot()
+
+
+class ZombieBoss(pygame.sprite.Sprite):
+    def __init__(self, group, x, y, speed):
+        super().__init__(group)
+        self.image = load_image("zombie_boss.png")
+        self.blood_image = load_image("blood.png", colorkey=-1)
+        self.og_surf = pygame.transform.smoothscale(
+            load_image("zombie_boss.png", (0, 0, 0)).convert(), (250, 250))
+        self.surf = self.og_surf
+        self.rect = self.surf.get_rect()
+        self.angle = 0
+        self.rect.x = x
+        self.rect.y = y
+        self.change_angle = 0
+        self.time = 150
+        self.killed = False
+        self.speed = speed
+        self.mask = pygame.mask.from_surface(self.image)
+        self.next_point = (300, 300)
+        self.hp = 3
+
+    def rot(self):
+        self.surf = pygame.transform.rotate(self.og_surf, self.angle)
+        self.rect = self.surf.get_rect(center=self.rect.center)
+
+    def rotate_zombie_sprite(self, pointX, pointY):
+        rad = math.atan2(pointY - self.rect.y,
+                         pointX - self.rect.x)
+        self.angle = 270 - math.degrees(rad)
+        self.rot()
+
+    def zombie_kill(self, start):
+        self.time = (pygame.time.get_ticks() - start) / 1000
+        if self.time > 3:
+            self.kill()
+
+    def block_collide(self, block_sprites, rect):
+        for block in block_sprites:
+            if rect.colliderect(block.rect):
+                return True
+        return False
+
+    def tank_nearby(self, tank, distance):
+        return abs(tank.rect.x - self.rect.x) <= distance and abs(tank.rect.y - self.rect.y) <= distance
+
+    def zombie_move(self, goalX, goalY, block_sprites):
+        test_rect = self.rect.copy()
+        self.rotate_zombie_sprite(goalX, goalY)
+        if goalX >= self.rect.x and goalY >= self.rect.y:
+            test_rect.x += self.speed
+            test_rect.y += self.speed  # Минимальное движение вправо
+            if not self.block_collide(block_sprites, test_rect):
+                self.rect.x += self.speed  # Минимальное движение вправо
+                self.rect.y += self.speed
+            else:
+                self.next_point = self.gen_next_point(*self.next_point)
+
+        elif goalX >= self.rect.x and goalY <= self.rect.y:
+            test_rect.x += self.speed
+            test_rect.y -= self.speed
+            if not self.block_collide(block_sprites, test_rect):
+                self.rect.x += self.speed  # Минимальное движение влево
+                self.rect.y -= self.speed
+            else:
+                self.next_point = self.gen_next_point(*self.next_point)
+
+        elif goalX <= self.rect.x and goalY >= self.rect.y:
+            test_rect.x -= self.speed
+            test_rect.y += self.speed
+            if not self.block_collide(block_sprites, test_rect):
+                self.rect.x -= self.speed  # Минимальное движение влево
+                self.rect.y += self.speed
+            else:
+                self.next_point = self.gen_next_point(*self.next_point)
+
+        else:
+            test_rect.x -= self.speed
+            test_rect.y -= self.speed
+            if not self.block_collide(block_sprites, test_rect):
+                self.rect.x -= self.speed  # Минимальное движение влево
+                self.rect.y -= self.speed
+            else:
+                self.next_point = self.gen_next_point(*self.next_point)
+
+    def gen_next_point(self, curX, curY) -> tuple:
+        angle_points = [(120, 60), (120, 450), (760, 60), (760, 450)]
+        if 350 < curX < 550 and 200 < curY < 320:
+            return random.choice(angle_points)
+        points = [(random.randint(110, 350), random.randint(50, 330)),
+                  (random.randint(110, 350), random.randint(330, 470)),
+                  (random.randint(550, 780), random.randint(50, 330)),
+                  (random.randint(550, 780), random.randint(330, 470))]
+        if curX <= 350 and curY <= 200:
+            points.pop(0)
+        elif curX <= 400 and curY >= 320:
+            points.pop(1)
+        elif curX >= 400 and curY <= 200:
+            points.pop(2)
+        else:
+            points.pop(3)
+        return random.choice(points)
+
+    def level1_zombi(self, tank, block_sprites):
+
+        if self.tank_nearby(tank, 220):
+
+            self.zombie_move(tank.rect.x, tank.rect.y, block_sprites)
+
+        else:
+            if abs(self.next_point[0] - self.rect.x) <= 10 and abs(self.next_point[1] - self.rect.y) <= 10:
+                self.next_point = self.gen_next_point(
+                    *self.next_point)  # (random.randint(0, 1080), random.randint(0, 720))
+                self.rotate_zombie_sprite(*self.next_point)
+            # print(self.rect.x, self.rect.y)
+            print(self.next_point)
+            self.zombie_move(self.next_point[0], self.next_point[1], block_sprites)
+
+    def handle_bullet_collide(self, bullet_sprites):
+        if not self.killed:
+            for b in bullet_sprites:
+                if pygame.sprite.collide_mask(self, b):
+                    b.kill()
+                    self.hp -= 1
+                    if self.hp <= 0:
+                        self.killed = True
+                        self.start = pygame.time.get_ticks()
+                        self.surf = pygame.transform.smoothscale(
+                            self.blood_image.convert(), (40, 48))
+
+    def update(self, bullet_sprites, tank, block_sprites, water_sprites):
+        self.handle_bullet_collide(bullet_sprites)
+        if self.killed:
+            self.zombie_kill(self.start)
+        else:
+            self.level1_zombi(tank, block_sprites)

@@ -7,7 +7,7 @@ import random
 
 from map_logic import generate_map, read_map
 from sprites.tank import Bullet, Tank, Turret  # , Turret
-from sprites.zombie import Zombie
+from sprites.zombie import Zombie, ZombieBoss
 
 # инициализация Pygame
 pygame.init()
@@ -79,6 +79,7 @@ if __name__ == '__main__':
         turret_sprites = pygame.sprite.Group()
         bullet_sprites = pygame.sprite.Group()
         zombie_sprites = pygame.sprite.Group()
+        zombieBoss_sprites = pygame.sprite.Group()
         zombies_list = list()
         # генерация карты и блоков
         level_file = 'level' + str(level) + '.txt'
@@ -99,10 +100,19 @@ if __name__ == '__main__':
         turret = Turret(turret_sprites, tank=tank)
         arrow = Arrow()
 
-        for i in range(5):
-            zombie = Zombie(zombie_sprites, zombies_list, randint(300, 700), randint(
-                500, 600), speed=random.choice([1, 1.3]))
-            zombies_list.append(zombie)
+        if level == 0:
+            for i in range(5):
+
+                zombie = Zombie(zombie_sprites, zombies_list, randint(300, 700), randint(
+                    500, 600), speed=random.choice([1, 1.3]))
+                zombies_list.append(zombie)
+        elif level == 1:
+            for i in range(1):
+                zombie = Zombie(zombie_sprites, zombies_list, randint(100, 700), randint(
+                    550, 600), speed=random.choice([1.1, 1.7]))
+                zombies_list.append(zombie)
+            zombie_boss = ZombieBoss(zombieBoss_sprites, 600, 380, 1)
+
 
         intro_text = ["Танкокалипсис", "", "", "",
                       "Правила игры:",
@@ -126,7 +136,7 @@ if __name__ == '__main__':
                     arrow.rect.y = -100
 
             tank_sprites.update(keys, mouse_x, mouse_y, block_sprites,
-                                turret, zombie_sprites, water_sprites)
+                                turret, zombie_sprites, water_sprites, zombie_boss_sprites=zombieBoss_sprites)
             # отрисовка карты
             map_sprite.draw(surf_alpha)
 
@@ -134,6 +144,7 @@ if __name__ == '__main__':
             screen.blit(surf_alpha, (0, 0))
             for zombie in zombie_sprites:
                 screen.blit(zombie.surf, zombie.rect)
+            screen.blit(zombie_boss.surf, zombie_boss.rect)
             screen.blit(tank.surf, tank.rect)
             screen.blit(turret.surf, turret.rect)
             tank.draw_hp(screen)
@@ -146,6 +157,8 @@ if __name__ == '__main__':
 
             map_sprite.update()
             zombie_sprites.update(bullet_sprites, tank,
+                                  block_sprites, water_sprites)
+            zombieBoss_sprites.update(bullet_sprites, tank,
                                   block_sprites, water_sprites)
             arrow_sprites.draw(screen)
             if not zombies_list:
