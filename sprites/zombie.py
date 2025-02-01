@@ -15,9 +15,9 @@ class Zombie(pygame.sprite.Sprite):
         self.og_surf = pygame.transform.smoothscale(
             load_image("zombie.png", (0, 0, 0)).convert(), (40, 48))
         self.zombie_kill_sound = pygame.mixer.Sound('data/zombie_kill.wav')
-        self.zombie_kill_sound.set_volume(0.5)
+        self.zombie_kill_sound.set_volume(1)
         self.zombie_nearby_sound = pygame.mixer.Sound('data/zombie_nearby.wav')
-        self.zombie_nearby_sound.set_volume(0.3)
+        self.zombie_nearby_sound.set_volume(0.6)
         self.sound_played = False
         self.surf = self.og_surf
         self.rect = self.surf.get_rect()

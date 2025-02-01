@@ -15,6 +15,7 @@ size = width, height = 1080, 720
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 fps = 100
+move_sound = pygame.mixer.Sound('data/move.wav')
 if True:
     from common import load_image
 
@@ -70,6 +71,7 @@ if __name__ == '__main__':
 
     surf_alpha = pygame.Surface((width, height))
     pygame.mixer.music.load('data/soundtrack.mp3')
+
     pygame.mixer.music.play(-1)
 
     def level_run(level):
@@ -91,13 +93,13 @@ if __name__ == '__main__':
 
         block_sprites.add(*blocks)
         water_sprites.add(*waters)
-        # базовые настройкиas
+        # базовые настройки
         pygame.display.set_caption('Танкокалипсис')
         running = True
         pygame.mouse.set_visible(False)
 
         # вызов спрайтов
-        tank = Tank(tank_sprites, 300, 300)
+        tank = Tank(tank_sprites, 300, 300, move_sound)
         turret = Turret(turret_sprites, tank=tank)
         arrow = Arrow()
 
@@ -163,15 +165,15 @@ if __name__ == '__main__':
             zombieBoss_sprites.update(bullet_sprites, tank,
                                   block_sprites, water_sprites, zombies_list, zombie_sprites)
             arrow_sprites.draw(screen)
-            if not zombies_list:
-                intro_text = ["Танкокалипсис", "", "", "",
-                              "Уровень пройден!!!:"]
-                fon_screen(intro_text)
-                running = False
             if tank.hp <= 0:
                 intro_text = ["Танкокалипсис", "",
                               "О нет",
                               "ты проиграл!"]
+                fon_screen(intro_text)
+                running = False
+            elif not zombies_list:
+                intro_text = ["Танкокалипсис", "", "", "",
+                              "Уровень пройден!!!:"]
                 fon_screen(intro_text)
                 running = False
             pygame.display.flip()

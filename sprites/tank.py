@@ -8,18 +8,17 @@ from common import load_image
 class Tank(pygame.sprite.Sprite):
     image = load_image("tank.png")
 
-    def __init__(self, group, x, y):
+    def __init__(self, group, x, y, move_sound):
         super().__init__(group)
         self.og_surf = pygame.transform.smoothscale(load_image(
             "tank.png", colorkey=(0, 255, 0)).convert(), (60, 111))
         self.shoot_sound = pygame.mixer.Sound('data/shoot.wav')
-        self.shoot_sound.set_volume(0.5)
-        self.move_sound = pygame.mixer.Sound('data/move.wav')
-        self.move_sound.set_volume(0.5)
+        self.shoot_sound.set_volume(0.7)
+        self.move_sound = move_sound
+        self.move_sound.set_volume(0.7)
         self.zombie_kill_sound = pygame.mixer.Sound('data/zombie_kill.wav')
-        self.shoot_chanel = pygame.mixer.find_channel()
-        self.shoot_chanel.play(self.move_sound,-1)
-        self.shoot_chanel.pause()
+        self.move_chanel = pygame.mixer.find_channel(True)
+        self.move_chanel.play(move_sound)
         self.moved = False
         self.rotated = False
         self.surf = self.og_surf
@@ -268,10 +267,9 @@ class Tank(pygame.sprite.Sprite):
         self.move_tank()
 
         if self.moved or self.rotated:
-            self.shoot_chanel.unpause()
-
+            self.move_chanel.unpause()
         else:
-            self.shoot_chanel.pause()
+            self.move_chanel.pause()
 
         # turret.update()
 
