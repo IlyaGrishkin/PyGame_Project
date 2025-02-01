@@ -161,7 +161,7 @@ if __name__ == '__main__':
             zombie_sprites.update(bullet_sprites, tank,
                                   block_sprites, water_sprites)
             zombieBoss_sprites.update(bullet_sprites, tank,
-                                  block_sprites, water_sprites)
+                                  block_sprites, water_sprites, zombies_list, zombie_sprites)
             arrow_sprites.draw(screen)
             if not zombies_list:
                 intro_text = ["Танкокалипсис", "", "", "",

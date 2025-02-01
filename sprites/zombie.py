@@ -29,7 +29,7 @@ class Zombie(pygame.sprite.Sprite):
         self.killed = False
         self.speed = speed
         self.mask = pygame.mask.from_surface(self.image)
-        self.next_point = (300, 300)
+        self.next_point = (random.randint(200, 700), random.randint(150, 400))
 
     def rot(self):
         self.surf = pygame.transform.rotate(self.og_surf, self.angle)
@@ -156,35 +156,7 @@ class Zombie(pygame.sprite.Sprite):
             self.zombie_move(self.next_point[0], self.next_point[1], block_sprites)
             self.sound_played = False
 
-        """
-        
-        if random.random() < 0.5:        
-            if random.random() < 0.5:
-                test_rect.x += 2 * random.random() - 1            
-                if not self.block_collide(block_sprites, test_rect):
-                    self.rect.x += 2 * random.random() - 1            
-                else:
-                    self.rect.x -= 6 * random.random() - 1        
-            else:
-                test_rect.x -= 2 * random.random() - 1            
-                if not self.block_collide(block_sprites, test_rect):
-                    self.rect.x -= 2 * random.random() - 1
-                else:                
-                    self.rect.x += 6 * random.random() - 1
-        else:        
-            if random.random() < 0.5:
-                test_rect.y += 2 * random.random() - 1            
-                if not self.block_collide(block_sprites, test_rect):
-                    self.rect.y += 2 * random.random() - 1            
-                else:
-                    self.rect.y -= 6 * random.random() - 1        
-            else:
-                test_rect.y -= 2 * random.random() - 1            
-                if not self.block_collide(block_sprites, test_rect):
-                    self.rect.y -= 2 * random.random() - 1
-                else:                
-                    self.rect.y += 6 * random.random() - 1
-        """
+
 
     def rotate_zombie_sprite(self, pointX, pointY):
         rad = math.atan2(pointY - self.rect.y,
@@ -210,7 +182,7 @@ class ZombieBoss(pygame.sprite.Sprite):
     def __init__(self, group, x, y, speed):
         super().__init__(group)
         self.image = load_image("zombie_boss.png")
-        self.blood_image = load_image("blood.png", colorkey=-1)
+        self.blood_image = load_image("destroyed_boss.png")
         self.og_surf = pygame.transform.smoothscale(
             load_image("zombie_boss.png", (0, 0, 0)).convert(), (250, 250))
         self.surf = self.og_surf
@@ -254,6 +226,7 @@ class ZombieBoss(pygame.sprite.Sprite):
     def zombie_move(self, goalX, goalY, block_sprites):
         test_rect = self.rect.copy()
         self.rotate_zombie_sprite(goalX, goalY)
+
         if goalX >= self.rect.x and goalY >= self.rect.y:
             test_rect.x += self.speed
             test_rect.y += self.speed  # Минимальное движение вправо
@@ -309,8 +282,7 @@ class ZombieBoss(pygame.sprite.Sprite):
         return random.choice(points)
 
     def level1_zombi(self, tank, block_sprites):
-        if self.tank_nearby(tank, 220):
-
+        if self.tank_nearby(tank, 200):
             self.zombie_move(tank.rect.x, tank.rect.y, block_sprites)
             self.speed = 1.3
 
@@ -334,12 +306,19 @@ class ZombieBoss(pygame.sprite.Sprite):
                     if self.hp <= 0:
                         self.killed = True
                         self.start = pygame.time.get_ticks()
-                        self.surf = pygame.transform.smoothscale(
-                            self.blood_image.convert(), (40, 48))
+                        self.surf = self.blood_image
 
-    def update(self, bullet_sprites, tank, block_sprites, water_sprites):
+    def gen_small_zombies(self, zombies_list, zombie_sprites):
+        if random.random() <= 0.005:
+            for i in range(3):
+                zombie = Zombie(zombie_sprites, zombies_list, self.rect.x + random.randint(-5, 5),
+                                self.rect.y + random.randint(-5, 5), speed=random.choice([1.1, 1.3]))
+                zombies_list.append(zombie)
+
+    def update(self, bullet_sprites, tank, block_sprites, water_sprites, zombies_list, zombie_sprites):
         self.handle_bullet_collide(bullet_sprites)
         if self.killed:
             self.zombie_kill(self.start)
         else:
+            self.gen_small_zombies(zombies_list, zombie_sprites)
             self.level1_zombi(tank, block_sprites)

@@ -269,10 +269,10 @@ class Tank(pygame.sprite.Sprite):
 
         if self.moved or self.rotated:
             self.shoot_chanel.unpause()
-            print(self.moved, self.rotated)
+
         else:
             self.shoot_chanel.pause()
-            print('stop')
+
         # turret.update()
 
         # управление поворотом башни
