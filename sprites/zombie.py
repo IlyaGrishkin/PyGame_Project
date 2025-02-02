@@ -15,9 +15,9 @@ class Zombie(pygame.sprite.Sprite):
         self.og_surf = pygame.transform.smoothscale(
             load_image("zombie.png", (0, 0, 0)).convert(), (40, 48))
         self.zombie_kill_sound = pygame.mixer.Sound('data/zombie_kill.wav')
-        self.zombie_kill_sound.set_volume(1)
+        self.zombie_kill_sound.set_volume(0.005)
         self.zombie_nearby_sound = pygame.mixer.Sound('data/zombie_nearby.wav')
-        self.zombie_nearby_sound.set_volume(0.6)
+        self.zombie_nearby_sound.set_volume(0.03)
         self.sound_played = False
         self.surf = self.og_surf
         self.rect = self.surf.get_rect()
@@ -111,7 +111,8 @@ class Zombie(pygame.sprite.Sprite):
                 self.rect.x += self.speed  # Минимальное движение вправо
                 self.rect.y += self.speed
             else:
-                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+                self.next_point = (random.randint(0, 1080),
+                                   random.randint(0, 720))
 
         elif goalX >= self.rect.x and goalY <= self.rect.y:
             test_rect.x += self.speed
@@ -120,16 +121,18 @@ class Zombie(pygame.sprite.Sprite):
                 self.rect.x += self.speed  # Минимальное движение влево
                 self.rect.y -= self.speed
             else:
-                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+                self.next_point = (random.randint(0, 1080),
+                                   random.randint(0, 720))
 
         elif goalX <= self.rect.x and goalY >= self.rect.y:
             test_rect.x -= self.speed
             test_rect.y += self.speed
             if not self.block_collide(block_sprites, test_rect):
-                self.rect.x -= self.speed  # Минимальное движение влево            
+                self.rect.x -= self.speed  # Минимальное движение влево
                 self.rect.y += self.speed
             else:
-                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+                self.next_point = (random.randint(0, 1080),
+                                   random.randint(0, 720))
 
         else:
             test_rect.x -= self.speed
@@ -138,7 +141,8 @@ class Zombie(pygame.sprite.Sprite):
                 self.rect.x -= self.speed  # Минимальное движение влево
                 self.rect.y -= self.speed
             else:
-                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+                self.next_point = (random.randint(0, 1080),
+                                   random.randint(0, 720))
 
     def level1_zombi(self, tank, block_sprites):
 
@@ -150,13 +154,13 @@ class Zombie(pygame.sprite.Sprite):
 
         else:
             if abs(self.next_point[0] - self.rect.x) <= 5 and abs(self.next_point[1] - self.rect.y) <= 5:
-                self.next_point = (random.randint(0, 1080), random.randint(0, 720))
+                self.next_point = (random.randint(0, 1080),
+                                   random.randint(0, 720))
                 self.rotate_zombie_sprite(*self.next_point)
 
-            self.zombie_move(self.next_point[0], self.next_point[1], block_sprites)
+            self.zombie_move(
+                self.next_point[0], self.next_point[1], block_sprites)
             self.sound_played = False
-
-
 
     def rotate_zombie_sprite(self, pointX, pointY):
         rad = math.atan2(pointY - self.rect.y,
@@ -290,11 +294,13 @@ class ZombieBoss(pygame.sprite.Sprite):
 
             if abs(self.next_point[0] - self.rect.x) <= 10 and abs(self.next_point[1] - self.rect.y) <= 10:
                 self.next_point = self.gen_next_point(
-                    *self.next_point)  # (random.randint(0, 1080), random.randint(0, 720))
+                    # (random.randint(0, 1080), random.randint(0, 720))
+                    *self.next_point)
                 self.rotate_zombie_sprite(*self.next_point)
             # print(self.rect.x, self.rect.y)
             print(self.next_point)
-            self.zombie_move(self.next_point[0], self.next_point[1], block_sprites)
+            self.zombie_move(
+                self.next_point[0], self.next_point[1], block_sprites)
             self.speed = 1
 
     def handle_bullet_collide(self, bullet_sprites):

@@ -49,8 +49,11 @@ def fon_screen(intro_text):
         pygame.display.flip()
         clock.tick(fps)
 
+
 arrow_sprites = pygame.sprite.Group()
 # прицел
+
+
 class Arrow(pygame.sprite.Sprite):
     image = load_image("crosshair.png")
 
@@ -71,7 +74,7 @@ if __name__ == '__main__':
 
     surf_alpha = pygame.Surface((width, height))
     pygame.mixer.music.load('data/soundtrack.mp3')
-
+    pygame.mixer.music.set_volume(0.05)
     pygame.mixer.music.play(-1)
 
     def level_run(level):
@@ -116,7 +119,6 @@ if __name__ == '__main__':
                 zombies_list.append(zombie)
             zombie_boss = ZombieBoss(zombieBoss_sprites, 600, 380, 1)
             zombies_list.append(zombie_boss)
-
 
         intro_text = ["Танкокалипсис", "", "", "",
                       "Правила игры:",
@@ -163,7 +165,7 @@ if __name__ == '__main__':
             zombie_sprites.update(bullet_sprites, tank,
                                   block_sprites, water_sprites)
             zombieBoss_sprites.update(bullet_sprites, tank,
-                                  block_sprites, water_sprites, zombies_list, zombie_sprites)
+                                      block_sprites, water_sprites, zombies_list, zombie_sprites)
             arrow_sprites.draw(screen)
             if tank.hp <= 0:
                 intro_text = ["Танкокалипсис", "",
@@ -178,7 +180,6 @@ if __name__ == '__main__':
                 running = False
             pygame.display.flip()
             clock.tick(fps)
-
 
     level_run(1)
     arrow_sprites = pygame.sprite.Group()

@@ -13,10 +13,11 @@ class Tank(pygame.sprite.Sprite):
         self.og_surf = pygame.transform.smoothscale(load_image(
             "tank.png", colorkey=(0, 255, 0)).convert(), (60, 111))
         self.shoot_sound = pygame.mixer.Sound('data/shoot.wav')
-        self.shoot_sound.set_volume(0.7)
+        self.shoot_sound.set_volume(0.1)
         self.move_sound = move_sound
-        self.move_sound.set_volume(0.7)
+        self.move_sound.set_volume(0.02)
         self.zombie_kill_sound = pygame.mixer.Sound('data/zombie_kill.wav')
+        self.zombie_kill_sound.set_volume(0.1)
         self.move_chanel = pygame.mixer.find_channel(True)
         self.move_chanel.play(move_sound)
         self.moved = False
@@ -165,9 +166,9 @@ class Tank(pygame.sprite.Sprite):
             bullet_dx = self.bullet_speed * math.cos(turret.angle)
             bullet_dy = -self.bullet_speed * math.sin(turret.angle)
             end_x = (turret.rect.x + 5) + \
-                    self.barrel_length * math.cos(turret.angle)
+                self.barrel_length * math.cos(turret.angle)
             end_y = (turret.rect.y + 5) - \
-                    self.barrel_length * math.sin(turret.angle)
+                self.barrel_length * math.sin(turret.angle)
             self.last_shot_time = current_time
             self.shoot_sound.play()
             return [end_x, end_y, bullet_dx, bullet_dy, turret.angle]
@@ -232,7 +233,8 @@ class Tank(pygame.sprite.Sprite):
     def show_cooldown(self, screen):
         current_time = time.time()
         if current_time - self.last_shot_time < self.reload_time:
-            cooldown_text = f"{self.reload_time - (current_time - self.last_shot_time):.2f}s"
+            cooldown_text = f"{self.reload_time -
+                               (current_time - self.last_shot_time):.2f}s"
             font = pygame.font.SysFont(None, 30)
             text = font.render(cooldown_text, True, (255, 255, 255))
             screen.blit(text, (self.rect.x, self.rect.y - 30))
