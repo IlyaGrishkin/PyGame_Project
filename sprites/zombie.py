@@ -289,7 +289,7 @@ class ZombieBoss(pygame.sprite.Sprite):
         return random.choice(points)
 
     def level1_zombi(self, tank, block_sprites):
-        if self.tank_nearby(tank, 200):
+        if self.tank_nearby(tank, 250):
             self.zombie_move(tank.rect.x, tank.rect.y, block_sprites)
             self.speed = 1.3
 

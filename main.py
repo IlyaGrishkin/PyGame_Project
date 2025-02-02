@@ -7,6 +7,7 @@ import sys
 import random
 import sqlite3
 
+from common import load_image
 from map_logic import generate_map, read_map
 from sprites.tank import Bullet, Tank, Turret  # , Turret
 from sprites.zombie import Zombie, ZombieBoss
@@ -19,6 +20,7 @@ screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 fps = 100
 move_sound = pygame.mixer.Sound('data/move.wav')
+pygame.display.set_icon(load_image('game_icon.jpg'))
 health_upgrade = 0
 speed_upgrade = 0
 reload_upgrade = 0
@@ -50,8 +52,7 @@ class Stopwatch:  # секундомер
 
 def draw_cur_time(screen, stopwatch: Stopwatch):
     font = pygame.font.Font('./data/TeletactileRus.ttf', 40)
-    text = font.render(f'{stopwatch.elapsed_time /
-                       1000:.2f} сек', True, (255, 255, 255))
+    text = font.render(f'{stopwatch.elapsed_time / 1000:.2f} сек', True, (255, 255, 255))
     text_x = 870
     text_y = 20
     text_w = text.get_width()

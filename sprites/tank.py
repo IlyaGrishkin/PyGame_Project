@@ -250,8 +250,7 @@ class Tank(pygame.sprite.Sprite):
     def show_cooldown(self, screen):
         current_time = time.time()
         if current_time - self.last_shot_time < self.reload_time:
-            cooldown_text = f"{self.reload_time -
-                               (current_time - self.last_shot_time):.2f}с"
+            cooldown_text = f"{self.reload_time - (current_time - self.last_shot_time):.2f}с"
             font = pygame.font.Font('./data/TeletactileRus.ttf', 30)
             text = font.render(cooldown_text, True, (255, 255, 255))
             screen.blit(text, (self.rect.x, self.rect.y - 30))
