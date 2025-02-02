@@ -10,6 +10,7 @@ def terminate():
     pygame.quit()
     sys.exit()
 
+
 class Tank(pygame.sprite.Sprite):
     image = load_image("tank.png")
 
@@ -139,10 +140,21 @@ class Tank(pygame.sprite.Sprite):
         self.old_y = self.rect.y
         new_x = self.rect.x + self.current_speed * math.sin(self.tank_angle)
         new_y = self.rect.y - self.current_speed * math.cos(self.tank_angle)
-        if -40 <= new_x <= 1100 - self.rect.width:
+
+        if new_x <= -40:
+            self.rect.x = 1120
+        if new_x >= 1120:
+            self.rect.x = -40
+        if new_y <= -40:
+            self.rect.y = 760
+        if new_y >= 760:
+            self.rect.y = -40
+
+        if -40 < new_x < 1120:
             self.rect.x = new_x
-        if -40 <= new_y <= 750 - self.rect.height:
+        if -40 < new_y < 760:
             self.rect.y = new_y
+
         if self.old_x == new_x and self.old_y == new_y:
             self.moved = False
         else:
@@ -288,8 +300,6 @@ class Tank(pygame.sprite.Sprite):
 
         # логика стрельбы
         self.bullet_info = self.shoot_bullet(keys, turret=turret)
-
-
 
 
 class Turret(pygame.sprite.Sprite):

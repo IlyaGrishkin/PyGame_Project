@@ -17,7 +17,7 @@ class Zombie(pygame.sprite.Sprite):
         self.zombie_kill_sound = pygame.mixer.Sound('data/zombie_kill.wav')
         self.zombie_kill_sound.set_volume(0.005)
         self.zombie_nearby_sound = pygame.mixer.Sound('data/zombie_nearby.wav')
-        self.zombie_nearby_sound.set_volume(0.03)
+        self.zombie_nearby_sound.set_volume(0.01)
         self.sound_played = False
         self.surf = self.og_surf
         self.rect = self.surf.get_rect()
@@ -30,6 +30,7 @@ class Zombie(pygame.sprite.Sprite):
         self.speed = speed
         self.mask = pygame.mask.from_surface(self.image)
         self.next_point = (random.randint(200, 700), random.randint(150, 400))
+        self.collide_behavior = random.choice([-1, 1])
 
     def rot(self):
         self.surf = pygame.transform.rotate(self.og_surf, self.angle)
@@ -43,6 +44,7 @@ class Zombie(pygame.sprite.Sprite):
     def block_collide(self, block_sprites, rect):
         for block in block_sprites:
             if rect.colliderect(block.rect):
+                self.rect.x += self.collide_behavior
                 return True
         return False
 
@@ -146,7 +148,7 @@ class Zombie(pygame.sprite.Sprite):
 
     def level1_zombi(self, tank, block_sprites):
 
-        if self.tank_nearby(tank, 150):
+        if self.tank_nearby(tank, distance=400):
             if not self.sound_played:
                 self.zombie_nearby_sound.play()
                 self.sound_played = True

@@ -110,7 +110,7 @@ if __name__ == '__main__':
         arrow = Arrow()
 
         if level == 1:
-            for i in range(5):
+            for i in range(23):
                 zombie = Zombie(zombie_sprites, zombies_list, randint(300, 700), randint(
                     580, 630), speed=random.choice([1, 1.3]))
                 zombies_list.append(zombie)
