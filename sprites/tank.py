@@ -1,9 +1,14 @@
 import math
+import sys
 import time
 import pygame
 
 from common import load_image
 
+
+def terminate():
+    pygame.quit()
+    sys.exit()
 
 class Tank(pygame.sprite.Sprite):
     image = load_image("tank.png")
@@ -283,6 +288,8 @@ class Tank(pygame.sprite.Sprite):
 
         # логика стрельбы
         self.bullet_info = self.shoot_bullet(keys, turret=turret)
+
+
 
 
 class Turret(pygame.sprite.Sprite):

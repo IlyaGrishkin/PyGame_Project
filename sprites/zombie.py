@@ -201,6 +201,7 @@ class ZombieBoss(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.next_point = (300, 300)
         self.hp = 3
+        self.gen_zombie_count = 0
 
     def rot(self):
         self.surf = pygame.transform.rotate(self.og_surf, self.angle)
@@ -315,11 +316,13 @@ class ZombieBoss(pygame.sprite.Sprite):
                         self.surf = self.blood_image
 
     def gen_small_zombies(self, zombies_list, zombie_sprites):
-        if random.random() <= 0.005:
+        self.gen_zombie_count += 1
+        if self.gen_zombie_count >= 420:
             for i in range(3):
-                zombie = Zombie(zombie_sprites, zombies_list, self.rect.x + random.randint(-5, 5),
-                                self.rect.y + random.randint(-5, 5), speed=random.choice([1.1, 1.3]))
+                zombie = Zombie(zombie_sprites, zombies_list, self.rect.x - 3 + random.randint(-5, 5),
+                                self.rect.y - 3 + random.randint(-5, 5), speed=random.choice([1.1, 1.3]))
                 zombies_list.append(zombie)
+            self.gen_zombie_count = 0
 
     def update(self, bullet_sprites, tank, block_sprites, water_sprites, zombies_list, zombie_sprites):
         self.handle_bullet_collide(bullet_sprites)
