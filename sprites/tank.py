@@ -14,7 +14,7 @@ def terminate():
 class Tank(pygame.sprite.Sprite):
     image = load_image("tank.png")
 
-    def __init__(self, group, x, y, move_sound):
+    def __init__(self, group, x, y, move_sound, health_upgrade, speed_upgrade, reload_upgrade):
         super().__init__(group)
         self.og_surf = pygame.transform.smoothscale(load_image(
             "tank.png", colorkey=(0, 255, 0)).convert(), (60, 111))
@@ -32,11 +32,11 @@ class Tank(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect()
         self.tank_angle = 0
         self.change_angle = 0
-        self.acceleration = 0.08
-        self.max_speed = 3
+        self.acceleration = 0.08 + (0.08 * speed_upgrade)
+        self.max_speed = 3 + (3 * speed_upgrade)
         self.current_speed = 0
         self.bullet_speed = 100
-        self.reload_time = 3
+        self.reload_time = 3 - (1 * reload_upgrade)
         self.last_shot_time = 0
         self.bullet_speed = 10
         self.bullets = []
@@ -44,7 +44,7 @@ class Tank(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(Tank.image)
         self.old_x = self.rect.x
         self.old_y = self.rect.y
-        self.hp = 3
+        self.hp = 3 + health_upgrade
         # длина ствола
         self.barrel_length = 1
 
@@ -200,7 +200,7 @@ class Tank(pygame.sprite.Sprite):
                 self.rect.y = self.old_y
                 return True
 
-    def water_collide(self, water_sprites, surface=None):
+    def water_collide(self, water_sprites, speed_upgrade,surface=None):
         if surface is None:
             surface = self.surf
         self.mask = pygame.mask.from_surface(surface)
@@ -208,13 +208,13 @@ class Tank(pygame.sprite.Sprite):
             # self.rect.x = self.old_x
             # self.rect.y = self.old_y
             # return True
-            self.acceleration = 0.02
+            self.acceleration = 0.02 + (0.02 * speed_upgrade)
             self.tank_rotation_speed_stationary = 0.03
-            self.max_speed = 1.5
+            self.max_speed = 1.5 + (1.5 * speed_upgrade)
         else:
-            self.acceleration = 0.08
+            self.acceleration = 0.08 + (0.08 * speed_upgrade)
             self.tank_rotation_speed_stationary = 0.06
-            self.max_speed = 3
+            self.max_speed = 3 + (3 * speed_upgrade)
 
     def zombie_collide(self, zombie_sprites):
         self.mask = pygame.mask.from_surface(self.surf)
@@ -256,7 +256,7 @@ class Tank(pygame.sprite.Sprite):
             text = font.render(cooldown_text, True, (255, 255, 255))
             screen.blit(text, (self.rect.x, self.rect.y - 30))
 
-    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites, water_sprites,
+    def update(self, keys, mouse_x, mouse_y, block_sprites, turret: "Turret", zombie_sprites, water_sprites, speed_upgrade,
                zombie_boss_sprites=None):
         # логика скорости
         self.control_speed(keys)
@@ -273,7 +273,7 @@ class Tank(pygame.sprite.Sprite):
 
         # проверка столкновений с водой
 
-        self.water_collide(water_sprites)
+        self.water_collide(water_sprites, speed_upgrade)
 
         # проверка столкновений с зомби
 

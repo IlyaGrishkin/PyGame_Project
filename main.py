@@ -16,35 +16,48 @@ screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 fps = 100
 move_sound = pygame.mixer.Sound('data/move.wav')
+health_upgrade = 0
+speed_upgrade = 0
+reload_upgrade = 0
 if True:
     from common import load_image
 
 
-def terminate():
-    pygame.quit()
-    sys.exit()
-
-
-def fon_screen(intro_text):
+def fon_screen(intro_text, level):
+    global health_upgrade, speed_upgrade, reload_upgrade
     fon = pygame.transform.scale(load_image('start.png'), (width, height))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
     text_coord = 10
     for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('white'))
+        string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
-        text_coord += 10
+        text_coord += 20
         intro_rect.top = text_coord
         intro_rect.x = 10
         text_coord += intro_rect.height
+        pygame.draw.rect(screen, (152, 251, 152), (intro_rect.x - 10, intro_rect.y - 10,
+                                                intro_rect.width + 20, intro_rect.height + 20))
         screen.blit(string_rendered, intro_rect)
 
     while True:
         for event in pygame.event.get():
+            keys = pygame.key.get_pressed()
             if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.quit()
+                sys.exit()
+            elif level != 0 and level != 3 and alive:
+                if keys[pygame.K_1]:
+                    health_upgrade += 1
+                    return health_upgrade
+                elif keys[pygame.K_2]:
+                    speed_upgrade += 1
+                    return
+                elif keys[pygame.K_3]:
+                    reload_upgrade += 1
+                    return
+            elif (level == 0  or level == 3 or not alive) and (event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN):
                 return  # начинаем игру
         pygame.display.flip()
         clock.tick(fps)
@@ -105,7 +118,7 @@ if __name__ == '__main__':
         pygame.mouse.set_visible(False)
 
         # вызов спрайтов
-        tank = Tank(tank_sprites, 300, 300, move_sound)
+        tank = Tank(tank_sprites, 300, 300, move_sound, health_upgrade, speed_upgrade, reload_upgrade)
         turret = Turret(turret_sprites, tank=tank)
         arrow = Arrow()
 
@@ -117,18 +130,12 @@ if __name__ == '__main__':
         elif level == 2:
             for i in range(7):
                 zombie = Zombie(zombie_sprites, zombies_list, randint(450, 550), randint(
-                    100, 180), speed=random.choice([1.1, 1.7]))
+                    100, 180), speed=random.choice([1.1, 1.5]))
                 zombies_list.append(zombie)
             for i in range(7):
                 zombie = Zombie(zombie_sprites, zombies_list, randint(450, 550), randint(
-                    580, 630), speed=random.choice([1.1, 1.7]))
+                    580, 630), speed=random.choice([1.1, 1.5]))
                 zombies_list.append(zombie)
-
-        intro_text = ["Танкокалипсис", "", "", "",
-                      "Правила игры:",
-                      "Уничтожь всех зомби на уровне!",
-                      "Не дай зомби к тебе прикоснуться"]
-        fon_screen(intro_text)
 
         # игровой цикл
         while running:
@@ -137,7 +144,8 @@ if __name__ == '__main__':
             mouse_x, mouse_y = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.quit()
+                    sys.exit()
                 if pygame.mouse.get_focused():
                     arrow.update(mouse_x, mouse_y)
                 else:
@@ -145,7 +153,7 @@ if __name__ == '__main__':
                     arrow.rect.y = -100
 
             tank_sprites.update(keys, mouse_x, mouse_y, block_sprites,
-                                turret, zombie_sprites, water_sprites, zombie_boss_sprites=zombieBoss_sprites)
+                                turret, zombie_sprites, water_sprites, speed_upgrade, zombie_boss_sprites=zombieBoss_sprites)
             # отрисовка карты
             map_sprite.draw(surf_alpha)
 
@@ -171,17 +179,21 @@ if __name__ == '__main__':
                                       block_sprites, water_sprites, zombies_list, zombie_sprites)
             arrow_sprites.draw(screen)
             if tank.hp <= 0:
-                intro_text = ["Танкокалипсис", "",
+                intro_text = ["Танкокалипсис",
                               "О нет",
                               "ты проиграл!"]
-                fon_screen(intro_text)
-                running = False
                 global alive
                 alive = False
+                fon_screen(intro_text, level)
+                running = False
             elif not zombies_list:
-                intro_text = ["Танкокалипсис", "", "", "",
-                              "Уровень пройден!!!:"]
-                fon_screen(intro_text)
+                intro_text = ["Танкокалипсис",
+                              "Уровень пройден!!!",
+                              "Выбери усиление:",
+                              "1 - Увеличить прочность",
+                              "2 - Увеличить скорость",
+                              "3 - Увеличить скорость перезарядки"]
+                fon_screen(intro_text, level)
                 running = False
             pygame.display.flip()
             clock.tick(fps)
@@ -211,7 +223,7 @@ if __name__ == '__main__':
         pygame.mouse.set_visible(False)
 
         # вызов спрайтов
-        tank = Tank(tank_sprites, 300, 300, move_sound)
+        tank = Tank(tank_sprites, 300, 300, move_sound, health_upgrade, speed_upgrade, reload_upgrade)
         turret = Turret(turret_sprites, tank=tank)
         arrow = Arrow()
 
@@ -222,11 +234,11 @@ if __name__ == '__main__':
         zombie_boss = ZombieBoss(zombieBoss_sprites, 700, 380, 1)
         # zombies_list.append(zombie_boss)
 
-        intro_text = ["Танкокалипсис", "", "", "",
-                      "Правила игры:",
-                      "Уничтожь всех зомби на уровне!",
-                      "Не дай зомби к тебе прикоснуться"]
-        fon_screen(intro_text)
+        # intro_text = ["Танкокалипсис", "", "", "",
+        #               "Правила игры:",
+        #               "Уничтожь всех зомби на уровне!",
+        #               "Не дай зомби к тебе прикоснуться"]
+        # fon_screen(intro_text)
 
         # игровой цикл
         while running:
@@ -235,7 +247,8 @@ if __name__ == '__main__':
             mouse_x, mouse_y = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.quit()
+                    sys.exit()
                 if pygame.mouse.get_focused():
                     arrow.update(mouse_x, mouse_y)
                 else:
@@ -243,7 +256,7 @@ if __name__ == '__main__':
                     arrow.rect.y = -100
 
             tank_sprites.update(keys, mouse_x, mouse_y, block_sprites,
-                                turret, zombie_sprites, water_sprites, zombie_boss_sprites=zombieBoss_sprites)
+                                turret, zombie_sprites, water_sprites, speed_upgrade,zombie_boss_sprites=zombieBoss_sprites)
             # отрисовка карты
             map_sprite.draw(surf_alpha)
 
@@ -270,19 +283,26 @@ if __name__ == '__main__':
                                       block_sprites, water_sprites, zombies_list, zombie_sprites)
             arrow_sprites.draw(screen)
             if tank.hp <= 0:
-                intro_text = ["Танкокалипсис", "",
+                intro_text = ["Танкокалипсис",
                               "О нет",
                               "ты проиграл!"]
-                fon_screen(intro_text)
+                fon_screen(intro_text, 3)
                 running = False
             elif not zombies_list and zombie_boss.killed:
-                intro_text = ["Танкокалипсис", "", "", "",
-                              "Уровень пройден!!!:"]
-                fon_screen(intro_text)
+                intro_text = ["Танкокалипсис",
+                              "Поздравляем, ты прошел игру!!!"]
+                fon_screen(intro_text, health_upgrade)
                 running = False
             pygame.display.flip()
             clock.tick(fps)
 
+    intro_text = ["Танкокалипсис",
+                  "Правила игры:",
+                  "Уничтожь всех зомби на уровне!",
+                  "Не дай зомби к тебе прикоснуться",
+                  "Движение - W, A, S, D",
+                  "Стрельба - ЛКМ"]
+    fon_screen(intro_text, 0)
     level_run(1)
     arrow_sprites = pygame.sprite.Group()
     if alive:
