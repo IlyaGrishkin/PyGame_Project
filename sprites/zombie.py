@@ -324,6 +324,17 @@ class ZombieBoss(pygame.sprite.Sprite):
                 zombies_list.append(zombie)
             self.gen_zombie_count = 0
 
+    def draw_hp(self, screen):
+        font = pygame.font.Font('./data/TeletactileRus.ttf', 50)
+        text = font.render('БОСС: ' + self.hp * '*', True, (255, 0, 0))
+        text_x = 370
+        text_y = 20
+        text_w = text.get_width()
+        text_h = text.get_height()
+        screen.blit(text, (text_x, text_y))
+        pygame.draw.rect(screen, (255, 0, 0), (text_x - 10, text_y - 10,
+                                               text_w + 20, text_h + 20), 1)
+
     def update(self, bullet_sprites, tank, block_sprites, water_sprites, zombies_list, zombie_sprites):
         self.handle_bullet_collide(bullet_sprites)
         if self.killed:

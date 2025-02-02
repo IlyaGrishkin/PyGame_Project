@@ -1,13 +1,16 @@
 from random import randint
+import time
 
 import pygame
 import os
 import sys
 import random
+import sqlite3
 
 from map_logic import generate_map, read_map
 from sprites.tank import Bullet, Tank, Turret  # , Turret
 from sprites.zombie import Zombie, ZombieBoss
+from sql import CREATE_RECORD_TABLE, GET_TOP_3_RECORDS, INSERT_RECORD
 
 # инициализация Pygame
 pygame.init()
@@ -19,12 +22,48 @@ move_sound = pygame.mixer.Sound('data/move.wav')
 health_upgrade = 0
 speed_upgrade = 0
 reload_upgrade = 0
+cursor = sqlite3.connect('db.db')
+cursor.execute(CREATE_RECORD_TABLE)
 if True:
     from common import load_image
 
 
-def fon_screen(intro_text, level):
+class Stopwatch:  # секундомер
+    elapsed_time = 0
+    start_time = 0
+    is_running = False
+
+    def turn_on(self):
+        self.is_running = True
+        if not self.start_time:
+            self.start_time = pygame.time.get_ticks()
+        else:
+            self.elapsed_time += pygame.time.get_ticks() - self.start_time
+            self.start_time = pygame.time.get_ticks()
+        # return self.elapsed_time
+
+    def turn_off(self):
+        self.is_running = False
+        self.elapsed_time += pygame.time.get_ticks() - self.start_time
+        self.start_time = 0
+
+
+def draw_cur_time(screen, stopwatch: Stopwatch):
+    font = pygame.font.Font('./data/TeletactileRus.ttf', 40)
+    text = font.render(f'{stopwatch.elapsed_time /
+                       1000:.2f} сек', True, (255, 255, 255))
+    text_x = 700
+    text_y = 20
+    text_w = text.get_width()
+    text_h = text.get_height()
+    screen.blit(text, (text_x, text_y))
+    pygame.draw.rect(screen, (255, 255, 255), (text_x - 10, text_y - 10,
+                                               text_w + 20, text_h + 20), 1)
+
+
+def fon_screen(intro_text, level, stopwatch: Stopwatch):
     global health_upgrade, speed_upgrade, reload_upgrade
+    stopwatch.turn_off()
     fon = pygame.transform.scale(load_image('start.png'), (width, height))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
@@ -37,7 +76,7 @@ def fon_screen(intro_text, level):
         intro_rect.x = 10
         text_coord += intro_rect.height
         pygame.draw.rect(screen, (152, 251, 152), (intro_rect.x - 10, intro_rect.y - 10,
-                                                intro_rect.width + 20, intro_rect.height + 20))
+                                                   intro_rect.width + 20, intro_rect.height + 20))
         screen.blit(string_rendered, intro_rect)
 
     while True:
@@ -56,8 +95,8 @@ def fon_screen(intro_text, level):
                 elif keys[pygame.K_3]:
                     reload_upgrade += 1
                     return
-            elif (level == 0  or level == 3 or not alive) and (event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN):
+            elif (level == 0 or level == 3 or not alive) and (event.type == pygame.KEYDOWN or
+                                                              event.type == pygame.MOUSEBUTTONDOWN):
                 return  # начинаем игру
         pygame.display.flip()
         clock.tick(fps)
@@ -93,7 +132,7 @@ if __name__ == '__main__':
     pygame.mixer.music.set_volume(0.05)
     pygame.mixer.music.play(-1)
 
-    def level_run(level):
+    def level_run(level, stopwatch: Stopwatch):
         map_sprites = pygame.sprite.Group()
         water_sprites = pygame.sprite.Group()
         block_sprites = pygame.sprite.Group()
@@ -118,7 +157,8 @@ if __name__ == '__main__':
         pygame.mouse.set_visible(False)
 
         # вызов спрайтов
-        tank = Tank(tank_sprites, 300, 300, move_sound, health_upgrade, speed_upgrade, reload_upgrade)
+        tank = Tank(tank_sprites, 300, 300, move_sound,
+                    health_upgrade, speed_upgrade, reload_upgrade)
         turret = Turret(turret_sprites, tank=tank)
         arrow = Arrow()
 
@@ -139,7 +179,7 @@ if __name__ == '__main__':
 
         # игровой цикл
         while running:
-
+            stopwatch.turn_on()
             keys = pygame.key.get_pressed()
             mouse_x, mouse_y = pygame.mouse.get_pos()
             for event in pygame.event.get():
@@ -159,6 +199,8 @@ if __name__ == '__main__':
 
             # отрисовка игровых объектов
             screen.blit(surf_alpha, (0, 0))
+            global draw_cur_time
+            draw_cur_time(screen, stopwatch=stopwatch)
             for zombie in zombie_sprites:
                 screen.blit(zombie.surf, zombie.rect)
 
@@ -184,7 +226,7 @@ if __name__ == '__main__':
                               "ты проиграл!"]
                 global alive
                 alive = False
-                fon_screen(intro_text, level)
+                fon_screen(intro_text, level, stopwatch=stopwatch)
                 running = False
             elif not zombies_list:
                 intro_text = ["Танкокалипсис",
@@ -193,12 +235,13 @@ if __name__ == '__main__':
                               "1 - Увеличить прочность",
                               "2 - Увеличить скорость",
                               "3 - Увеличить скорость перезарядки"]
-                fon_screen(intro_text, level)
+                fon_screen(intro_text, level, stopwatch=stopwatch)
                 running = False
             pygame.display.flip()
             clock.tick(fps)
 
-    def run_boss_level():
+    def run_boss_level(stopwatch: Stopwatch):
+        stopwatch.turn_on()
         map_sprites = pygame.sprite.Group()
         water_sprites = pygame.sprite.Group()
         block_sprites = pygame.sprite.Group()
@@ -223,7 +266,8 @@ if __name__ == '__main__':
         pygame.mouse.set_visible(False)
 
         # вызов спрайтов
-        tank = Tank(tank_sprites, 300, 300, move_sound, health_upgrade, speed_upgrade, reload_upgrade)
+        tank = Tank(tank_sprites, 300, 300, move_sound,
+                    health_upgrade, speed_upgrade, reload_upgrade)
         turret = Turret(turret_sprites, tank=tank)
         arrow = Arrow()
 
@@ -256,7 +300,7 @@ if __name__ == '__main__':
                     arrow.rect.y = -100
 
             tank_sprites.update(keys, mouse_x, mouse_y, block_sprites,
-                                turret, zombie_sprites, water_sprites, speed_upgrade,zombie_boss_sprites=zombieBoss_sprites)
+                                turret, zombie_sprites, water_sprites, speed_upgrade, zombie_boss_sprites=zombieBoss_sprites)
             # отрисовка карты
             map_sprite.draw(surf_alpha)
 
@@ -269,6 +313,7 @@ if __name__ == '__main__':
             screen.blit(tank.surf, tank.rect)
             screen.blit(turret.surf, turret.rect)
             tank.draw_hp(screen)
+            zombie_boss.draw_hp(screen)
             tank.show_cooldown(screen)
             if tank.bullet_info:
                 bullet = Bullet(bullet_sprites, *tank.bullet_info)
@@ -286,12 +331,12 @@ if __name__ == '__main__':
                 intro_text = ["Танкокалипсис",
                               "О нет",
                               "ты проиграл!"]
-                fon_screen(intro_text, 3)
+                fon_screen(intro_text, 3, stopwatch=stopwatch)
                 running = False
             elif not zombies_list and zombie_boss.killed:
                 intro_text = ["Танкокалипсис",
                               "Поздравляем, ты прошел игру!!!"]
-                fon_screen(intro_text, health_upgrade)
+                fon_screen(intro_text, health_upgrade, stopwatch=stopwatch)
                 running = False
             pygame.display.flip()
             clock.tick(fps)
@@ -302,11 +347,24 @@ if __name__ == '__main__':
                   "Не дай зомби к тебе прикоснуться",
                   "Движение - W, A, S, D",
                   "Стрельба - ЛКМ"]
-    fon_screen(intro_text, 0)
-    level_run(1)
+
+    stopwatch = Stopwatch()
+    fon_screen(intro_text, 0, stopwatch=stopwatch)
+    level_run(1, stopwatch)
+
     arrow_sprites = pygame.sprite.Group()
     if alive:
-        level_run(2)
+        level_run(2, stopwatch=stopwatch)
+    else:
+        time_end = pygame.time.get_ticks()
+
     arrow_sprites = pygame.sprite.Group()
     if alive:
-        run_boss_level()
+        run_boss_level(stopwatch=stopwatch)
+        cursor.execute(INSERT_RECORD.format(
+            time=f'{stopwatch.elapsed_time / 1000:.2f} сек'))
+        cursor.commit()
+    res = cursor.execute(GET_TOP_3_RECORDS).fetchall()
+    cursor.close()
+
+    print(res)

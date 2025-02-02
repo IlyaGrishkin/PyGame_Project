@@ -200,7 +200,7 @@ class Tank(pygame.sprite.Sprite):
                 self.rect.y = self.old_y
                 return True
 
-    def water_collide(self, water_sprites, speed_upgrade,surface=None):
+    def water_collide(self, water_sprites, speed_upgrade, surface=None):
         if surface is None:
             surface = self.surf
         self.mask = pygame.mask.from_surface(surface)
@@ -237,7 +237,7 @@ class Tank(pygame.sprite.Sprite):
                     self.hp = 0
 
     def draw_hp(self, screen):
-        font = pygame.font.Font(None, 50)
+        font = pygame.font.Font('./data/TeletactileRus.ttf', 50)
         text = font.render('Здоровье: ' + str(self.hp), True, (255, 0, 0))
         text_x = 20
         text_y = 20
@@ -251,8 +251,8 @@ class Tank(pygame.sprite.Sprite):
         current_time = time.time()
         if current_time - self.last_shot_time < self.reload_time:
             cooldown_text = f"{self.reload_time -
-                               (current_time - self.last_shot_time):.2f}s"
-            font = pygame.font.SysFont(None, 30)
+                               (current_time - self.last_shot_time):.2f}с"
+            font = pygame.font.Font('./data/TeletactileRus.ttf', 30)
             text = font.render(cooldown_text, True, (255, 255, 255))
             screen.blit(text, (self.rect.x, self.rect.y - 30))
 
