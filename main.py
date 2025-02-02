@@ -10,7 +10,7 @@ import sqlite3
 from map_logic import generate_map, read_map
 from sprites.tank import Bullet, Tank, Turret  # , Turret
 from sprites.zombie import Zombie, ZombieBoss
-from sql import CREATE_RECORD_TABLE, GET_TOP_3_RECORDS, INSERT_RECORD
+from sql import CREATE_RECORD_TABLE, GET_LAST_3_RECORDS, GET_TOP_3_RECORDS, INSERT_RECORD
 
 # инициализация Pygame
 pygame.init()
@@ -52,7 +52,7 @@ def draw_cur_time(screen, stopwatch: Stopwatch):
     font = pygame.font.Font('./data/TeletactileRus.ttf', 40)
     text = font.render(f'{stopwatch.elapsed_time /
                        1000:.2f} сек', True, (255, 255, 255))
-    text_x = 700
+    text_x = 870
     text_y = 20
     text_w = text.get_width()
     text_h = text.get_height()
@@ -241,7 +241,6 @@ if __name__ == '__main__':
             clock.tick(fps)
 
     def run_boss_level(stopwatch: Stopwatch):
-        stopwatch.turn_on()
         map_sprites = pygame.sprite.Group()
         water_sprites = pygame.sprite.Group()
         block_sprites = pygame.sprite.Group()
@@ -286,7 +285,7 @@ if __name__ == '__main__':
 
         # игровой цикл
         while running:
-
+            stopwatch.turn_on()
             keys = pygame.key.get_pressed()
             mouse_x, mouse_y = pygame.mouse.get_pos()
             for event in pygame.event.get():
@@ -312,6 +311,8 @@ if __name__ == '__main__':
             screen.blit(zombie_boss.surf, zombie_boss.rect)
             screen.blit(tank.surf, tank.rect)
             screen.blit(turret.surf, turret.rect)
+            global draw_cur_time
+            draw_cur_time(screen, stopwatch=stopwatch)
             tank.draw_hp(screen)
             zombie_boss.draw_hp(screen)
             tank.show_cooldown(screen)
@@ -355,8 +356,6 @@ if __name__ == '__main__':
     arrow_sprites = pygame.sprite.Group()
     if alive:
         level_run(2, stopwatch=stopwatch)
-    else:
-        time_end = pygame.time.get_ticks()
 
     arrow_sprites = pygame.sprite.Group()
     if alive:
@@ -364,7 +363,7 @@ if __name__ == '__main__':
         cursor.execute(INSERT_RECORD.format(
             time=f'{stopwatch.elapsed_time / 1000:.2f} сек'))
         cursor.commit()
-    res = cursor.execute(GET_TOP_3_RECORDS).fetchall()
-    cursor.close()
 
+    res = cursor.execute(GET_LAST_3_RECORDS).fetchall()
+    cursor.close()
     print(res)
