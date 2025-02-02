@@ -19,9 +19,9 @@ class Tank(pygame.sprite.Sprite):
         self.og_surf = pygame.transform.smoothscale(load_image(
             "tank.png", colorkey=(0, 255, 0)).convert(), (60, 111))
         self.shoot_sound = pygame.mixer.Sound('data/shoot.wav')
-        self.shoot_sound.set_volume(0.1)
+        self.shoot_sound.set_volume(1)
         self.move_sound = move_sound
-        self.move_sound.set_volume(0.02)
+        self.move_sound.set_volume(0.8)
         self.zombie_kill_sound = pygame.mixer.Sound('data/zombie_kill.wav')
         self.zombie_kill_sound.set_volume(0.1)
         self.move_chanel = pygame.mixer.find_channel(True)

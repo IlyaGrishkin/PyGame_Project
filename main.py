@@ -129,7 +129,7 @@ if __name__ == '__main__':
     alive = True
     surf_alpha = pygame.Surface((width, height))
     pygame.mixer.music.load('data/soundtrack.mp3')
-    pygame.mixer.music.set_volume(0.05)
+    pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
 
     def level_run(level, stopwatch: Stopwatch):
@@ -329,14 +329,31 @@ if __name__ == '__main__':
                                       block_sprites, water_sprites, zombies_list, zombie_sprites)
             arrow_sprites.draw(screen)
             if tank.hp <= 0:
+                result = cursor.execute(GET_LAST_3_RECORDS).fetchall()
+                print(result)
                 intro_text = ["Танкокалипсис",
                               "О нет",
-                              "ты проиграл!"]
+                              "ты проиграл!",
+                              f'Твой результат: {stopwatch.elapsed_time / 1000:.2f} сек',
+                              f"Последние результаты:",
+                              '1. ' + result[0][1],
+                              '2. ' + result[1][1],
+                              '3. ' + result[2][1],
+                              ]
                 fon_screen(intro_text, 3, stopwatch=stopwatch)
                 running = False
             elif not zombies_list and zombie_boss.killed:
+                result = cursor.execute(GET_LAST_3_RECORDS).fetchall()
+                print(result)
                 intro_text = ["Танкокалипсис",
-                              "Поздравляем, ты прошел игру!!!"]
+                              "О нет",
+                              "ты проиграл!",
+                              f'Твой результат: {stopwatch.elapsed_time / 1000:.2f} сек',
+                              f"Последние результаты:",
+                              '1. ' + result[0][1],
+                              '2. ' + result[1][1],
+                              '3. ' + result[2][1],
+                              ]
                 fon_screen(intro_text, health_upgrade, stopwatch=stopwatch)
                 running = False
             pygame.display.flip()
@@ -364,6 +381,5 @@ if __name__ == '__main__':
             time=f'{stopwatch.elapsed_time / 1000:.2f} сек'))
         cursor.commit()
 
-    res = cursor.execute(GET_LAST_3_RECORDS).fetchall()
+    res = cursor.execute(GET_TOP_3_RECORDS).fetchall()
     cursor.close()
-    print(res)
